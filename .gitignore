@@ -1,3 +1,6 @@
+record_biases
+test_hll
+
 # Prerequisites
 *.d
 
