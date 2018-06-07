@@ -15,7 +15,7 @@ int main() {
 
 
   for(unsigned long i = 1; i <= max; i++) {
-    for (int j = 0; j < sample_size; j++)
+    for (size_t j = 0; j < sample_size; j++)
       hlls[j].insert(std::to_string(i) + "-" + std::to_string(j));
 
     if (i%inc == 0) {
