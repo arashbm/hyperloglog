@@ -1,6 +1,7 @@
 #include <vector>
 #include <map>
 #include <mutex>
+
 #include "MurmurHash3.h"
 
 
@@ -25,7 +26,7 @@ namespace hll {
     constexpr static unsigned int sparse_list_max
       = (1ul << precision)/sizeof(uint64_t);
     constexpr static unsigned int temporary_list_max
-      = sparse_list_max/4;
+      = sparse_list_max/10;
 
     mutable std::mutex insert_mutex;
 

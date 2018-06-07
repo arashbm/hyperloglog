@@ -76,7 +76,6 @@ hll::HyperLogLog<p, sp>::HyperLogLog(bool create_dense) {
     convert_to_dense();
   } else {
     sparse = true;
-    sparse_list.reserve((1ul << p)/sizeof(uint64_t));
     temporary_list.reserve(temporary_list_max);
   }
 
@@ -111,9 +110,9 @@ double hll::HyperLogLog<p, sp>::estimate_bias(double est) const {
   std::tie(sum, weight_sum) = std::accumulate(keys.begin(), keys.begin()+k,
       std::make_pair(0.0, 0.0),
       [] (
-        std::pair<double, double> t, // (sum, sum of weights)
+        std::pair<double, double> t,  // (sum, sum of weights)
         std::pair<double, double> key // (distance, bias)
-        ) -> double {
+        ) -> std::pair<double, double> {
       return std::make_pair(
         t.first + key.second*1.0/key.first,
         t.second + 1.0/key.first);
@@ -127,7 +126,7 @@ const std::map<double, double> hll::HyperLogLog<p, sp>::bias = hll::biases[p-4];
 
 
 template <unsigned short p, unsigned short sp>
-constexpr double hll::HyperLogLog<p, sp>::alpha() {
+constexpr double hll::HyperLogLog<p, sp>::alpha() const {
   if (p == 4)
     return 0.673;
   else if (p == 5)
@@ -139,7 +138,7 @@ constexpr double hll::HyperLogLog<p, sp>::alpha() {
 }
 
 template <unsigned short p, unsigned short sp>
-constexpr double hll::HyperLogLog<p, sp>::threshold() {
+constexpr double hll::HyperLogLog<p, sp>::threshold() const {
   double thresholds[] = { 10,     20,     40,     80,     220,
                           400,    900,    1800,   3100,   6500,
                           11500,  20000,  50000,  120000, 350000};
@@ -202,13 +201,14 @@ void hll::HyperLogLog<precision, sparse_precision>::insert(T item) {
     uint64_t encoded = encode_hash(index, rank);
     temporary_list.push_back(encoded);
 
+
     if (temporary_list.size() >= temporary_list_max) {
       std::vector<uint64_t> new_sparse_list = merged_temp_list();
       sparse_list.swap(new_sparse_list);
       temporary_list.clear();
     }
 
-    if (sparse_list_max*sizeof(uint64_t) > (1ul << precision))
+    if (sparse_list.size() >= sparse_list_max)
       convert_to_dense();
 
   } else
@@ -223,12 +223,13 @@ hll::HyperLogLog<precision, sparse_precision>::merged_temp_list() const{
   std::sort(temporary_list_copy.begin(), temporary_list_copy.end());
 
   std::vector<uint64_t> new_sparse_list;
-  new_sparse_list.reserve(sparse_list_max);
 
   auto it1 = temporary_list_copy.begin();
   auto it2 = sparse_list.begin();
 
+  int i = 0;
   while (it1 != temporary_list_copy.end() and it2 != sparse_list.end()) {
+    i++;
     uint64_t index1;
     uint8_t rank1;
     std::tie(index1, rank1) = decode_hash(*it1);
@@ -236,9 +237,11 @@ hll::HyperLogLog<precision, sparse_precision>::merged_temp_list() const{
     uint8_t rank2;
     std::tie(index2, rank2) = decode_hash(*it2);
 
-    if (index1 == index2)
+    if (index1 == index2) {
       new_sparse_list.push_back(encode_hash(index1, std::max(rank1, rank2)));
-    else if (index1 > index2) {
+      ++it1;
+      ++it2;
+    } else if (index1 > index2) {
       new_sparse_list.push_back(encode_hash(index2, rank2));
       ++it2;
     } else {
@@ -247,10 +250,13 @@ hll::HyperLogLog<precision, sparse_precision>::merged_temp_list() const{
     }
   }
 
-  if (it1 == temporary_list_copy.end() && it2 != temporary_list_copy.end())
-    new_sparse_list.insert(new_sparse_list.end(), it2, sparse_list.end());
-  else if (it2 == temporary_list_copy.end() && it1 != temporary_list_copy.end())
-    new_sparse_list.insert(new_sparse_list.end(), it1, temporary_list_copy.end());
+
+  if (it1 == temporary_list_copy.end() && it2 != sparse_list.end())
+    new_sparse_list.insert(new_sparse_list.end(),
+        it2, sparse_list.end());
+  else if (it2 == sparse_list.end() && it1 != temporary_list_copy.end())
+    new_sparse_list.insert(new_sparse_list.end(),
+        it1, temporary_list_copy.end());
 
   return new_sparse_list;
 }
@@ -258,12 +264,10 @@ hll::HyperLogLog<precision, sparse_precision>::merged_temp_list() const{
 template <unsigned short precision, unsigned short sparse_precision>
 void hll::HyperLogLog<precision, sparse_precision>::convert_to_dense() {
 
-  if (temporary_list.size() > 0) {
-    std::vector<uint64_t> new_sparse_list = merged_temp_list();
-    sparse_list.swap(new_sparse_list);
-    temporary_list.clear();
-    temporary_list.shrink_to_fit();
-  }
+  std::vector<uint64_t> new_sparse_list = merged_temp_list();
+  sparse_list.swap(new_sparse_list);
+  temporary_list.clear();
+  temporary_list.shrink_to_fit();
 
   dense.resize(1ul << precision, (uint8_t)0);
   for (const auto i: sparse_list) {
@@ -279,7 +283,7 @@ void hll::HyperLogLog<precision, sparse_precision>::convert_to_dense() {
       dense_rank = (uint8_t)(rank + (sparse_precision - precision));
     else
       dense_rank = (uint8_t)
-        ((__builtin_clzl(betweens) -
+        (((uint8_t)__builtin_clzl(betweens) -
           (sizeof(betweens)*8 - (sparse_precision - precision))) + 1);
     if (dense_rank > dense[dense_index]) dense[dense_index] = dense_rank;
   }
@@ -312,14 +316,8 @@ hll::HyperLogLog<precision, sparse_precision>::raw_estimate() const {
 
 template <unsigned short precision, unsigned short sparse_precision>
 double hll::HyperLogLog<precision, sparse_precision>::estimate() const {
-
   if (sparse) {
-    size_t nonzero = sparse_list.size();
-    if (temporary_list.size() > 0) {
-      std::vector<uint64_t> new_sparse_list = merged_temp_list();
-      nonzero = new_sparse_list.size();
-    }
-    std::cout << "blaaah" << std::endl;
+    size_t nonzero = merged_temp_list().size();
     return linear_estimate((unsigned)nonzero);
   } else {
     double e;
