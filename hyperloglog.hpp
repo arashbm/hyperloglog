@@ -23,9 +23,9 @@ namespace hll {
         "Precision should be less than sparse_precision");
 
     const static std::map<double, double> bias;
-    constexpr static unsigned int sparse_list_max
+    constexpr static unsigned long sparse_list_max
       = (1ul << precision)/sizeof(uint64_t);
-    constexpr static unsigned int temporary_list_max
+    constexpr static unsigned long temporary_list_max
       = sparse_list_max/10;
 
     mutable std::mutex insert_mutex;

@@ -12,6 +12,7 @@
 #include <cmath>
 #include <numeric>
 #include <mutex>
+#include <type_traits>
 
 #define MURMUR_SEED (uint32_t)161803 // golden ratio digits
 #define RANK_BITS 6 // log2(64)
@@ -20,13 +21,30 @@
 
 
 namespace hll {
-  template<>
-  uint64_t hash<int>(const int k) {
-    uint64_t hash_out[2];
-    MurmurHash3_x64_128(&k, sizeof(k),
-        MURMUR_SEED, hash_out);
-    return hash_out[1];
-  }
+#define _hll_define_arithmetic_hash(_Tp)  \
+  template<>                    \
+  uint64_t hash(const _Tp k) {            \
+    uint64_t hash_out[2];                 \
+    MurmurHash3_x64_128(&k, sizeof(k),    \
+        MURMUR_SEED, hash_out);           \
+    return hash_out[1];                   \
+  };
+
+  _hll_define_arithmetic_hash(bool)
+  _hll_define_arithmetic_hash(char)
+  _hll_define_arithmetic_hash(signed char)
+  _hll_define_arithmetic_hash(unsigned char)
+  _hll_define_arithmetic_hash(wchar_t)
+  _hll_define_arithmetic_hash(char16_t)
+  _hll_define_arithmetic_hash(char32_t)
+  _hll_define_arithmetic_hash(short)
+  _hll_define_arithmetic_hash(int)
+  _hll_define_arithmetic_hash(long)
+  _hll_define_arithmetic_hash(long long)
+  _hll_define_arithmetic_hash(unsigned short)
+  _hll_define_arithmetic_hash(unsigned int)
+  _hll_define_arithmetic_hash(unsigned long)
+  _hll_define_arithmetic_hash(unsigned long long)
 
   template<>
   uint64_t hash<::std::string>(const ::std::string k) {
@@ -201,7 +219,6 @@ void hll::HyperLogLog<precision, sparse_precision>::insert(T item) {
     uint64_t encoded = encode_hash(index, rank);
     temporary_list.push_back(encoded);
 
-
     if (temporary_list.size() >= temporary_list_max) {
       std::vector<uint64_t> new_sparse_list = merged_temp_list();
       sparse_list.swap(new_sparse_list);
@@ -221,6 +238,21 @@ std::vector<uint64_t>
 hll::HyperLogLog<precision, sparse_precision>::merged_temp_list() const{
   std::vector<uint64_t> temporary_list_copy = temporary_list;
   std::sort(temporary_list_copy.begin(), temporary_list_copy.end());
+
+  std::reverse(temporary_list_copy.begin(), temporary_list_copy.end());
+
+  auto last = std::unique(
+      temporary_list_copy.begin(),
+      temporary_list_copy.end(),
+      [this] (uint64_t a, uint64_t b) -> bool {
+        uint64_t index1, index2;
+        std::tie(index1, std::ignore) = decode_hash(a);
+        std::tie(index2, std::ignore) = decode_hash(b);
+        return index1 == index2;
+      });
+
+  temporary_list_copy.erase(last, temporary_list_copy.end());
+  std::reverse(temporary_list_copy.begin(), temporary_list_copy.end());
 
   std::vector<uint64_t> new_sparse_list;
 

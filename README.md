@@ -1,2 +1,2 @@
 # HyperLogLog
-HyperLogLog++ Implementation with C++11
+HyperLogLog++ Implementation with C++14
