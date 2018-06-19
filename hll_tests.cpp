@@ -5,7 +5,7 @@
 constexpr unsigned short p = 18, sp = 25;
 
 TEST_CASE( "counts small sets", "[sparse]" ) {
-  auto h = hll::HyperLogLog<p, sp>();
+  auto h  = hll::HyperLogLog<p, sp>();
   SECTION("small cardinalities") {
     for (int i = 1; i <= 20; i++) {
       h.insert(i);
@@ -14,6 +14,7 @@ TEST_CASE( "counts small sets", "[sparse]" ) {
       REQUIRE( i-1 < est );
     }
   }
+
   SECTION("only counting distincts") {
     for (int i = 0; i < 20; i++)
       for (int j = 1; j <= 20; j++)
@@ -21,6 +22,40 @@ TEST_CASE( "counts small sets", "[sparse]" ) {
     double est = h.estimate();
     REQUIRE( est < 21 );
     REQUIRE( 19 < est );
+  }
+
+  SECTION("merging with itself shouldn't deadlock") {
+    for (int i = 1; i<= 20; i++) {
+      h.insert(i);
+    }
+    h.merge(h);
+    double est = h.estimate();
+    REQUIRE( est < 21 );
+    REQUIRE( 19 < est );
+  }
+
+  SECTION("merging sparse counters") {
+    auto h2 = hll::HyperLogLog<p, sp>();
+    for (int i = 1; i<= 20; i++) {
+      h.insert(i);
+      h2.insert(i+5);
+    }
+    h.merge(h2);
+    double est = h.estimate();
+    REQUIRE( est < 26 );
+    REQUIRE( 24 < est );
+  }
+
+  SECTION("merging dense counter into a sparse counter") {
+    auto h2 = hll::HyperLogLog<p, sp>(true);
+    for (int i = 1; i<= 20; i++) {
+      h.insert(i);
+      h2.insert(i+5);
+    }
+    h.merge(h2);
+    double est = h.estimate();
+    REQUIRE( est < 26 );
+    REQUIRE( 24 < est );
   }
 }
 
@@ -45,6 +80,30 @@ TEST_CASE( "counts large sets", "[dense]" ) {
     REQUIRE( est < count*(1.0 + relative_error) );
     REQUIRE( count*(1.0 - relative_error) < est );
   }
+
+  SECTION("merging dense counters") {
+    auto h2 = hll::HyperLogLog<p, sp>(true);
+    for (int i = 1; i<= 20; i++) {
+      h.insert(i);
+      h2.insert(i+5);
+    }
+    h.merge(h2);
+    double est = h.estimate();
+    REQUIRE( est < 26 );
+    REQUIRE( 24 < est );
+  }
+
+  SECTION("merging sparse counter into a dense counter") {
+    auto h2 = hll::HyperLogLog<p, sp>();
+    for (int i = 1; i<= 20; i++) {
+      h.insert(i);
+      h2.insert(i+5);
+    }
+    h.merge(h2);
+    double est = h.estimate();
+    REQUIRE( est < 26 );
+    REQUIRE( 24 < est );
+  }
 }
 
 TEST_CASE( "counts after transitioning from sparse to dense", "[transition]" ) {
@@ -55,10 +114,12 @@ TEST_CASE( "counts after transitioning from sparse to dense", "[transition]" ) {
   SECTION("large cardinalities") {
     for (unsigned long i = 1; i <= count ; i++) {
       h.insert(i);
+      if (i % (count/100) == 0) {
+        double est = h.estimate();
+        REQUIRE( est < i*(1.0 + relative_error) );
+        REQUIRE( i*(1.0 - relative_error) < est );
+      }
     }
-    double est = h.estimate();
-    REQUIRE( est < count*(1.0 + relative_error) );
-    REQUIRE( count*(1.0 - relative_error) < est );
   }
   SECTION("only counting distincts") {
     for (int i = 0; i < 20; i++)

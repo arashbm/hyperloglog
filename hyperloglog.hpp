@@ -10,6 +10,7 @@ namespace hll {
   template<typename T>
   uint64_t hash(const T k);
 
+
   template <unsigned short int precision=14,
            unsigned short int sparse_precision=24>
   class HyperLogLog {
@@ -36,8 +37,13 @@ namespace hll {
     std::vector<uint64_t> temporary_list;
 
 
+    std::vector<uint8_t> converted_to_dense() const;
     void convert_to_dense();
+    void merge_temp();
+
     std::vector<uint64_t> merged_temp_list() const;
+    std::vector<uint64_t> merged_sorted_list(const std::vector<uint64_t> other)
+      const;
 
     double estimate_bias(double biassed_estimate) const;
 
@@ -57,7 +63,7 @@ namespace hll {
     HyperLogLog(const hll::HyperLogLog<precision, sparse_precision> &other);
 
     template <typename T> void insert(T item);
-    void merge(const HyperLogLog<precision, sparse_precision>& other);
+    void merge(const hll::HyperLogLog<precision, sparse_precision> other);
 
     double estimate() const;
     double measure_error(unsigned long original_cardinality) const;
