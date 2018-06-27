@@ -14,7 +14,6 @@
 #include <mutex>
 #include <type_traits>
 
-#define MURMUR_SEED (uint32_t)161803 // golden ratio digits
 #define RANK_BITS 6 // log2(64)
 
 #include <iostream>
@@ -22,13 +21,15 @@
 
 
 namespace hll {
-#define _hll_define_arithmetic_hash(_Tp)  \
-  template<>                    \
-  uint64_t hash(const _Tp k) {            \
-    uint64_t hash_out[2];                 \
-    MurmurHash3_x64_128(&k, sizeof(k),    \
-        MURMUR_SEED, hash_out);           \
-    return hash_out[1];                   \
+
+#define _hll_define_arithmetic_hash(_Tp)      \
+  template<>                                  \
+  uint64_t                                    \
+  hash(const _Tp & k, const uint32_t seed) {  \
+    uint64_t hash_out[2];                     \
+    MurmurHash3_x64_128(&k, sizeof(k),        \
+        seed, hash_out);                      \
+    return hash_out[1];                       \
   };
 
   _hll_define_arithmetic_hash(bool)
@@ -48,12 +49,13 @@ namespace hll {
   _hll_define_arithmetic_hash(unsigned long long)
 
   template<>
-  uint64_t hash<::std::string>(const ::std::string k) {
+  uint64_t
+  hash<::std::string>(const ::std::string & k, uint32_t seed) {
     uint64_t hash_out[2];
     MurmurHash3_x64_128(k.c_str(), (int)k.length()+1,
-        MURMUR_SEED, hash_out);
+        seed, hash_out);
     return hash_out[1];
-  }
+  };
 
   const std::map<double, double> biases[15] = {
 #include "biases/4"
@@ -89,7 +91,8 @@ namespace hll {
 }
 
 template <unsigned short p, unsigned short sp>
-hll::HyperLogLog<p, sp>::HyperLogLog(bool create_dense) {
+hll::HyperLogLog<p, sp>::HyperLogLog(bool create_dense, uint32_t seed)
+  : seed(seed) {
   if (create_dense) {
     sparse = false;
     convert_to_dense();
@@ -101,16 +104,15 @@ hll::HyperLogLog<p, sp>::HyperLogLog(bool create_dense) {
 }
 
 template <unsigned short p, unsigned short sp>
-hll::HyperLogLog<p, sp>::HyperLogLog(const hll::HyperLogLog<p, sp>& other)
-  : sparse((std::lock_guard<std::mutex>(other.insert_mutex),
-        other.sparse))
-    , dense((std::lock_guard<std::mutex>(other.insert_mutex),
-        other.dense))
-    , sparse_list((std::lock_guard<std::mutex>(other.insert_mutex),
-        other.sparse_list))
-    , temporary_list((std::lock_guard<std::mutex>(other.insert_mutex),
-        other.temporary_list)) {
-    }
+hll::HyperLogLog<p, sp>::HyperLogLog(const hll::HyperLogLog<p, sp> &other)
+{
+  seed = other.seed;
+  std::lock_guard<std::mutex>(other.insert_mutex);
+  sparse = other.sparse;
+  dense = other.dense;
+  sparse_list = other.sparse_list;
+  temporary_list = other.temporary_list;
+}
 
 
 template <unsigned short p, unsigned short sp>
@@ -207,7 +209,12 @@ hll::HyperLogLog<p, sp>::decode_hash(uint64_t hash) const {
 
 
 template <unsigned short p, unsigned short sp>
-void hll::HyperLogLog<p, sp>::merge(const hll::HyperLogLog<p, sp> other) {
+void hll::HyperLogLog<p, sp>::merge(const hll::HyperLogLog<p, sp> &other) {
+
+  if (seed != other.seed)
+    throw std::invalid_argument(
+        "two counters should have the same seed to merge");
+
   // have to make sure other is not == this.
   std::lock_guard<std::mutex> lock(insert_mutex);
   std::lock_guard<std::mutex> other_lock(other.insert_mutex);
@@ -241,7 +248,7 @@ template <unsigned short precision, unsigned short sparse_precision>
 template <typename T>
 void hll::HyperLogLog<precision, sparse_precision>::insert(T item) {
 
-  uint64_t hash = hll::hash(item);
+  uint64_t hash = hll::hash(item, seed);
   uint64_t index;
   uint8_t rank;
   std::tie(index, rank) = get_hash_rank(hash);
