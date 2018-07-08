@@ -2,7 +2,7 @@ CC = g++
 CXX = g++
 CXXFLAGS = -Werror -Wall -Wextra -O2 -funroll-loops -ffast-math -ftree-vectorize -mtune=native -std=c++14 -Wconversion -g
 
-all: MurmurHash3.o
+all: MurmurHash3.o hll_tests
 
 MurmurHash3.o: CXXFLAGS+=-Wno-implicit-fallthrough -Wno-sign-conversion
 

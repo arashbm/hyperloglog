@@ -22,7 +22,7 @@
 
 namespace hll {
 
-#define _hll_define_arithmetic_hash(_Tp)      \
+#define _hll_define_integral_hash(_Tp)      \
   template<>                                  \
   uint64_t                                    \
   hash(const _Tp & k, const uint32_t seed) {  \
@@ -32,21 +32,43 @@ namespace hll {
     return hash_out[1];                       \
   };
 
-  _hll_define_arithmetic_hash(bool)
-  _hll_define_arithmetic_hash(char)
-  _hll_define_arithmetic_hash(signed char)
-  _hll_define_arithmetic_hash(unsigned char)
-  _hll_define_arithmetic_hash(wchar_t)
-  _hll_define_arithmetic_hash(char16_t)
-  _hll_define_arithmetic_hash(char32_t)
-  _hll_define_arithmetic_hash(short)
-  _hll_define_arithmetic_hash(int)
-  _hll_define_arithmetic_hash(long)
-  _hll_define_arithmetic_hash(long long)
-  _hll_define_arithmetic_hash(unsigned short)
-  _hll_define_arithmetic_hash(unsigned int)
-  _hll_define_arithmetic_hash(unsigned long)
-  _hll_define_arithmetic_hash(unsigned long long)
+  _hll_define_integral_hash(bool)
+  _hll_define_integral_hash(char)
+  _hll_define_integral_hash(signed char)
+  _hll_define_integral_hash(unsigned char)
+  _hll_define_integral_hash(wchar_t)
+  _hll_define_integral_hash(char16_t)
+  _hll_define_integral_hash(char32_t)
+  _hll_define_integral_hash(short)
+  _hll_define_integral_hash(int)
+  _hll_define_integral_hash(long)
+  _hll_define_integral_hash(long long)
+  _hll_define_integral_hash(unsigned short)
+  _hll_define_integral_hash(unsigned int)
+  _hll_define_integral_hash(unsigned long)
+  _hll_define_integral_hash(unsigned long long)
+
+#undef _hll_define_integral_hash
+
+  // making sure hash(-0.0f) == hash(+0.0f)
+#define _hll_define_floating_point_hash(_Tp)  \
+  template<>                                  \
+  uint64_t                                    \
+  hash(const _Tp & k, const uint32_t seed) {  \
+    _Tp zero = 0.0;                           \
+    uint64_t hash_out[2];                     \
+    MurmurHash3_x64_128(                      \
+        ((k == 0.0) ? &zero : &k),            \
+        sizeof(k), seed, hash_out);           \
+    return hash_out[1];                       \
+  };
+
+  _hll_define_floating_point_hash(float)
+  _hll_define_floating_point_hash(double)
+  _hll_define_floating_point_hash(long double)
+
+#undef _hll_define_floating_point_hash
+
 
   template<>
   uint64_t
