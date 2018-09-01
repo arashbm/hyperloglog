@@ -4,6 +4,8 @@
 #include <iostream>
 #include <fstream>
 #include <numeric>
+#include <limits>
+#include <iomanip>
 
 template <unsigned short precision>
 void record_bias(size_t trials, unsigned int points,
@@ -19,11 +21,13 @@ void record_bias(size_t trials, unsigned int points,
 
 
   out << "{";
+  out << std::setprecision(std::numeric_limits<double>::digits10 + 1);
   for(unsigned long i = 1; i <= max; i++) {
     for (size_t j = 0; j < trials; j++)
       hlls[j].insert(std::to_string(i) + "-" + std::to_string(j));
 
     if (i%inc == 0) {
+      std::cerr << i/inc << std::endl;
       long double err = 0;
       for (const auto& h: hlls)
         err += h.measure_error(i);
@@ -41,8 +45,8 @@ void record_bias(size_t trials, unsigned int points,
 
 int main() {
 
-  size_t sample_size = 10000;
-  unsigned int points = 350;
+  size_t sample_size = 100'000;
+  unsigned int points = 500;
   std::string out_dir = "./biases/";
 
   record_bias<4>(sample_size, points, out_dir);
