@@ -8,12 +8,10 @@
 namespace hll {
 
   template<typename T>
-  uint64_t hash(const T k, uint32_t seed);
-
+  uint64_t hash(const T& k, const uint32_t seed);
 
   template <unsigned short int precision=14,
-           unsigned short int sparse_precision=24,
-           uint32_t seed=0x9e3779b9>
+           unsigned short int sparse_precision=24>
   class HyperLogLog {
     static_assert(precision > 3,
         "Precision should be 4 or greater");
@@ -33,6 +31,7 @@ namespace hll {
     mutable std::mutex insert_mutex;
 
     bool sparse;
+    uint32_t seed;
     std::vector<uint8_t> dense;
     std::vector<uint64_t> sparse_list;
     std::vector<uint64_t> temporary_list;
@@ -60,13 +59,11 @@ namespace hll {
     constexpr double alpha() const;
 
   public:
-    HyperLogLog(bool create_dense=false);
-    HyperLogLog(
-        const hll::HyperLogLog<precision, sparse_precision, seed> &other);
+    HyperLogLog(bool create_dense = false, uint32_t seed = 0x5A827999);
+    HyperLogLog(const hll::HyperLogLog<precision, sparse_precision> &other);
 
     template <typename T> void insert(T item);
-    void merge(
-        const hll::HyperLogLog<precision, sparse_precision, seed> other);
+    void merge(const hll::HyperLogLog<precision, sparse_precision> &other);
 
     double estimate() const;
     double measure_error(unsigned long original_cardinality) const;
