@@ -8,6 +8,7 @@ MurmurHash3.o: CXXFLAGS+=-Wno-implicit-fallthrough -Wno-sign-conversion
 
 hyperloglog.hpp: hyperloglog.tpp
 record_biases: MurmurHash3.o | hyperloglog.hpp
+estimate_distribution: MurmurHash3.o | hyperloglog.hpp
 
 hll_tests: MurmurHash3.o tests.o | hyperloglog.hpp
 
