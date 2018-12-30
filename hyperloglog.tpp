@@ -140,25 +140,26 @@ template <unsigned short p, unsigned short sp>
 double
 hll::HyperLogLog<p, sp>::estimate_bias(double est) const {
   constexpr unsigned int k = 6; // K-nn parameter
-  std::vector<std::pair<double, double>> keys;
-
-  std::transform(bias.begin(), bias.end(), std::back_inserter(keys),
-      [est] (std::pair<double, double> b) -> std::pair<double, double> {
-      return std::make_pair(std::abs(b.first - est), b.second);
+  std::vector<std::pair<double, double>> keys(k);
+  std::partial_sort_copy(
+      bias.begin(), bias.end(),
+      keys.begin(), keys.end(),
+      [est] (std::pair<double, double> a,
+              std::pair<double, double> b) {
+              return std::abs(a.first - est) < std::abs(b.first - est);
       });
-  std::partial_sort(keys.begin(), keys.begin()+k, keys.end());
 
   double sum = 0;
   double weight_sum = 0;
   std::tie(sum, weight_sum) = std::accumulate(keys.begin(), keys.begin()+k,
       std::make_pair(0.0, 0.0),
-      [] (
+      [est] (
         std::pair<double, double> t,  // (sum, sum of weights)
         std::pair<double, double> key // (distance, bias)
         ) -> std::pair<double, double> {
       return std::make_pair(
-        t.first + key.second*1.0/key.first,
-        t.second + 1.0/key.first);
+        t.first + key.second*1.0/std::abs(key.first-est),
+        t.second + 1.0/std::abs(key.first-est));
       });
   return sum/weight_sum;
 }
