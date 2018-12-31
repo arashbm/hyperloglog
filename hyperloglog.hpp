@@ -22,7 +22,7 @@ namespace hll {
     static_assert(precision < sparse_precision,
         "Precision should be less than sparse_precision");
 
-    const static std::map<double, double> bias;
+    const static std::vector<std::pair<double, double>> bias;
     constexpr static unsigned long sparse_list_max
       = (1ul << precision)/sizeof(uint64_t);
     constexpr static unsigned long temporary_list_max

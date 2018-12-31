@@ -78,7 +78,7 @@ namespace hll {
     return hash_out[1];
   };
 
-  const std::map<double, double> biases[15] = {
+  const std::vector<std::pair<double, double>> biases[15] = {
 #include "biases/4"
     ,
 #include "biases/5"
@@ -139,10 +139,13 @@ hll::HyperLogLog<p, sp>::HyperLogLog(const hll::HyperLogLog<p, sp> &other)
 template <unsigned short p, unsigned short sp>
 double
 hll::HyperLogLog<p, sp>::estimate_bias(double est) const {
-  constexpr unsigned int k = 6; // K-nn parameter
+  constexpr size_t k = 6; // K-nn parameter
   std::vector<std::pair<double, double>> keys(k);
+  auto est_it = std::lower_bound(bias.begin(), bias.end(),
+      std::make_pair(est, 0.0));
   std::partial_sort_copy(
-      bias.begin(), bias.end(),
+      std::max(est_it - k, bias.begin()),
+      std::min(est_it + k, bias.end()),
       keys.begin(), keys.end(),
       [est] (std::pair<double, double> a,
               std::pair<double, double> b) {
@@ -166,7 +169,7 @@ hll::HyperLogLog<p, sp>::estimate_bias(double est) const {
 
 
 template <unsigned short p, unsigned short sp>
-const std::map<double, double>
+const std::vector<std::pair<double, double>>
 hll::HyperLogLog<p, sp>::bias = hll::biases[p-4];
 
 
