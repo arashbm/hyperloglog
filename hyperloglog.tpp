@@ -431,7 +431,7 @@ hll::HyperLogLog<precision, sparse_precision>::raw_estimate() const {
     unsigned non_zeros = 0;
     for(const auto& m_j: dense) {
       if (m_j > 0) non_zeros += 1;
-      sum += 1.0/((uint64_t)1 << m_j);
+      sum += 1.0/(double)((uint64_t)1 << m_j);
     }
 
     return std::make_pair(
