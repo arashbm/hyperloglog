@@ -59,6 +59,9 @@ namespace hll {
     constexpr double alpha() const;
 
   public:
+    static constexpr unsigned short int dense_prec = precision;
+    static constexpr unsigned short int sparse_prec = sparse_precision;
+
     HyperLogLog(bool create_dense = false, uint32_t seed = 0x5A827999);
     HyperLogLog(const hll::HyperLogLog<precision, sparse_precision> &other);
 
