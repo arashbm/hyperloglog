@@ -1,3 +1,7 @@
+#ifndef HYPERLOGLOG_H
+#define HYPERLOGLOG_H
+
+
 #include <vector>
 #include <map>
 #include <mutex>
@@ -75,3 +79,5 @@ namespace hll {
 
 
 #include "hyperloglog.tpp"
+
+#endif /* HYPERLOGLOG_H */
