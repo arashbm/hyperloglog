@@ -2,6 +2,7 @@
 HyperLogLog++ Implementation with C++14
 
 ## Getting Started
+
 Clone the library:
 ```bash
 $ git clone https://github.com/arashbm/HyperLogLog.git
@@ -12,6 +13,9 @@ Compile the library:
 $ cd HyperLogLog
 $ make
 ```
+
+Currently you would have to link against `./MurmurHash3.o` that would be created
+by running `make` or `make MurmurHash3.o`. Check out this example:
 
 
 ```
@@ -31,11 +35,12 @@ int main() {
 }
 ```
 
-Assuming you cloned this library in `/path/to/HyperLogLog` and have already
-compiled it, you can compile `example.cpp` with:
+Assuming you cloned this library in `/path/to/HyperLogLog` you can compile
+`example.cpp` with:
 
 ```bash
-$ g++ -std=c++14 -I/path/to/HyperLogLog  -c -o example.o example.cpp
+$ make -C /path/to/HyperLogLog/ MurmurHash3.o
+$ g++ -std=c++14 -I/path/to/HyperLogLog/include  -c -o example.o example.cpp
 $ g++ example.o /path/to/HyperLogLog/MurmurHash3.o -o example
 
 ```
