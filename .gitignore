@@ -1,6 +1,3 @@
-record_biases
-hll_tests
-
 # Prerequisites
 *.d
 
@@ -33,3 +30,7 @@ hll_tests
 *.exe
 *.out
 *.app
+
+record_biases
+tests
+estimate_distribution

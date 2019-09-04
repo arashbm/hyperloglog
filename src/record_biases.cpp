@@ -1,11 +1,11 @@
-#include "hyperloglog.hpp"
-
 #include <cmath>
 #include <iostream>
 #include <fstream>
 #include <numeric>
 #include <limits>
 #include <iomanip>
+
+#include "../include/hyperloglog.hpp"
 
 template <unsigned short precision>
 void record_bias(size_t trials, unsigned int points,
@@ -14,7 +14,7 @@ void record_bias(size_t trials, unsigned int points,
   out.open(out_dir + std::to_string(precision),
       std::ios::trunc | std::ios::out);
 
-  std::vector<hll::HyperLogLog<precision, precision+1>>
+  std::vector<hll::HyperLogLog<precision, (unsigned short int)(precision+1)>>
     hlls(trials, true);
 
   unsigned long max = (1u << precision)*6, inc = std::max(1ul, max/points);
@@ -47,7 +47,7 @@ int main() {
 
   size_t sample_size = 100'000;
   unsigned int points = 500;
-  std::string out_dir = "./biases/";
+  std::string out_dir = "./src/biases/";
 
   record_bias<4>(sample_size, points, out_dir);
   record_bias<5>(sample_size, points, out_dir);

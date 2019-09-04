@@ -1,10 +1,9 @@
-#include "hyperloglog.hpp"
-
 #include <cmath>
 #include <iostream>
 #include <fstream>
 #include <numeric>
 
+#include "../include/hyperloglog.hpp"
 template <unsigned short precision>
 void record_estimates(size_t trials, unsigned int points, size_t max) {
 

@@ -78,6 +78,6 @@ namespace hll {
 }
 
 
-#include "hyperloglog.tpp"
+#include "../src/hyperloglog.tpp"
 
 #endif /* HYPERLOGLOG_H */

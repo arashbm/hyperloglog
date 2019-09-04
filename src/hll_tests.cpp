@@ -1,6 +1,6 @@
 #include "catch.hpp"
 
-#include "hyperloglog.hpp"
+#include "../include/hyperloglog.hpp"
 
 constexpr unsigned short p = 18, sp = 25;
 
