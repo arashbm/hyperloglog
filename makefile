@@ -66,4 +66,4 @@ $(OBJDIR)/%.o : $(SRCDIR)/%.cxx $(DEPDIR)/%.d
 $(DEPDIR)/%.d: ;
 .PRECIOUS: $(DEPDIR)/%.d
 
-include $(wildcard $(DEPDIR)/*.d TSTOBJDIR/*.d)
+include $(wildcard $(DEPDIR)/*.d)
