@@ -5,14 +5,15 @@
 #include <vector>
 #include <map>
 #include <mutex>
-
-#include "MurmurHash3.h"
+#include <MurmurHash3.h>
 
 
 namespace hll {
 
   template<typename T>
-  uint64_t hash(const T& k, const uint32_t seed);
+  struct hash {
+    uint64_t operator()(const T&, const uint32_t seed);
+  };
 
   template <unsigned short int precision=14,
            unsigned short int sparse_precision=24>
