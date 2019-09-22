@@ -12,7 +12,7 @@ namespace hll {
 
   template<typename T>
   struct hash {
-    uint64_t operator()(const T&, const uint32_t seed);
+    uint64_t operator()(const T&, uint32_t seed) const;
   };
 
   template <unsigned short int precision=14,

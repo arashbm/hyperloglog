@@ -21,17 +21,17 @@
 
 
 namespace hll {
-#define _hll_define_integral_hash(_Tp)        \
-  template<>                                  \
-  struct hash<_Tp> {                          \
-    uint64_t                                  \
-    operator()(                               \
-        const _Tp & k, const uint32_t seed) { \
-      uint64_t hash_out[2];                   \
-      MurmurHash3_x64_128(&k, sizeof(k),      \
-          seed, hash_out);                    \
-      return hash_out[1];                     \
-    }                                         \
+#define _hll_define_integral_hash(_Tp)              \
+  template<>                                        \
+  struct hash<_Tp> {                                \
+    uint64_t                                        \
+    operator()(                                     \
+        const _Tp & k, uint32_t seed) const { \
+      uint64_t hash_out[2];                         \
+      MurmurHash3_x64_128(&k, sizeof(k),            \
+          seed, hash_out);                          \
+      return hash_out[1];                           \
+    }                                               \
   };
 
   _hll_define_integral_hash(bool)
@@ -53,19 +53,19 @@ namespace hll {
 #undef _hll_define_integral_hash
 
   // making sure hash(-0.0f) == hash(+0.0f)
-#define _hll_define_floating_point_hash(_Tp)  \
-  template<>                                  \
-  struct hash<_Tp> {                          \
-    uint64_t                                  \
-    operator()(                               \
-        const _Tp & k, const uint32_t seed) { \
-      _Tp zero = 0.0;                         \
-      uint64_t hash_out[2];                   \
-      MurmurHash3_x64_128(                    \
-          ((k == 0.0) ? &zero : &k),          \
-          sizeof(k), seed, hash_out);         \
-      return hash_out[1];                     \
-    }                                         \
+#define _hll_define_floating_point_hash(_Tp)        \
+  template<>                                        \
+  struct hash<_Tp> {                                \
+    uint64_t                                        \
+    operator()(                                     \
+        const _Tp & k, uint32_t seed) const { \
+      _Tp zero = 0.0;                               \
+      uint64_t hash_out[2];                         \
+      MurmurHash3_x64_128(                          \
+          ((k == 0.0) ? &zero : &k),                \
+          sizeof(k), seed, hash_out);               \
+      return hash_out[1];                           \
+    }                                               \
   };
 
   _hll_define_floating_point_hash(float)
@@ -75,9 +75,9 @@ namespace hll {
 #undef _hll_define_floating_point_hash
 
 
-  template<> struct hash<::std::string> {
+  template<> struct hash<std::string> {
     uint64_t
-    operator()(const ::std::string & k, uint32_t seed) {
+    operator()(const std::string& k, uint32_t seed) const {
       uint64_t hash_out[2];
       MurmurHash3_x64_128(k.c_str(), (int)k.length()+1,
           seed, hash_out);
