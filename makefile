@@ -32,6 +32,10 @@ LINK.o = $(LD) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 check: tests
 	./tests
 
+.PHONY: lint
+lint:
+	cpplint --extensions=tpp,cpp,hpp --quiet --recursive .
+
 .PHONY: clean
 clean:
 	$(RM) -r $(OBJDIR) $(DEPDIR)
