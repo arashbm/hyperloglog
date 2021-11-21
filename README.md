@@ -62,8 +62,7 @@ and run `example.cpp` with:
 $ g++ -std=c++14 \
     -I /path/to/hyperloglog/include \
     -isystem /path/to/hyperloglog/dep/MurmurHash3/include \
-    -o example.o example.cpp
-$ g++ example.o -o example
+    -o example example.cpp
 $ time ./example
 Estimate is 1.00296e+07
 
