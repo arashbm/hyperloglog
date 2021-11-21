@@ -1,4 +1,4 @@
-# hyperloglog
+# hyperloglog [![Actions Status](https://github.com/arashbm/hyperloglog/workflows/tests/badge.svg)](https://github.com/arashbm/hyperloglog/actions)
 hyperloglog++ implementation with C++14
 
 ## Getting Started
