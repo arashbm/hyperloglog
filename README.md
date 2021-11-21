@@ -1,21 +1,18 @@
-# HyperLogLog
-HyperLogLog++ Implementation with C++14
+# hyperloglog
+hyperloglog++ implementation with C++14
 
 ## Getting Started
 
 Clone the library:
 ```bash
-$ git clone https://github.com/arashbm/HyperLogLog.git
+$ git clone https://github.com/arashbm/hyperloglog.git
 ```
 
-Compile the library:
+Compile and run the tests:
 ```
-$ cd HyperLogLog
+$ cd hyperloglog
 $ make
 ```
-
-Currently you would have to link against `./MurmurHash3.o` that would be created
-by running `make` or `make MurmurHash3.o`. Check out this example:
 
 
 ```
@@ -25,7 +22,7 @@ by running `make` or `make MurmurHash3.o`. Check out this example:
 #include <hyperloglog.hpp>
 
 int main() {
-  auto h  = hll::HyperLogLog<18, 25>();
+  auto h  = hll::hyperloglog<18, 25>();
 
   for (unsigned long int i = 1; i <= 10'000'000UL; i++)
     h.insert(i);
@@ -35,12 +32,16 @@ int main() {
 }
 ```
 
-Assuming you cloned this library in `/path/to/HyperLogLog` you can compile
-`example.cpp` with:
+Assuming you cloned this library in `/path/to/hyperloglog` you can compile
+and run `example.cpp` with:
 
 ```bash
-$ make -C /path/to/HyperLogLog/ MurmurHash3.o
-$ g++ -std=c++14 -I/path/to/HyperLogLog/include  -c -o example.o example.cpp
-$ g++ example.o /path/to/HyperLogLog/MurmurHash3.o -o example
+$ g++ -std=c++14 \
+    -I/path/to/hyperloglog/include \
+    -isystem /path/to/hyperloglog/dep/MurmurHash3/include \
+    -c -o example.o example.cpp
+$ g++ example.o -o example
+$ ./example
+Estimate is 1.00296e+07
 
 ```
