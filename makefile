@@ -15,8 +15,8 @@ CXXFLAGS = -Werror -Wall -Wextra -Wconversion \
 					 -std=c++14 \
 					 -g \
 					 -funroll-loops -ffast-math -ftree-vectorize -mtune=native \
-					 -Idep/catch2/include \
-					 -Idep/MurmurHash3/include
+					 -I dep/catch2/include \
+					 -isystem dep/MurmurHash3/include
 
 LD = g++
 
@@ -28,19 +28,15 @@ POSTCOMPILE = @mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d && touch $@
 
 LINK.o = $(LD) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
-all: MurmurHash3.o tests
+all: tests
 
-MurmurHash3.o: CXXFLAGS+=-Wno-implicit-fallthrough -Wno-sign-conversion
-MurmurHash3.o: dep/MurmurHash3/src/MurmurHash3.cpp
-	$(COMPILE.cc) $<
-
-record_biases: MurmurHash3.o $(OBJDIR)/record_biases.o
+record_biases: $(OBJDIR)/record_biases.o
 	$(LINK.o)
 
-estimate_distribution: MurmurHash3.o $(OBJDIR)/estimate_distribution.o
+estimate_distribution: $(OBJDIR)/estimate_distribution.o
 	$(LINK.o)
 
-tests: MurmurHash3.o $(OBJDIR)/tests.o $(OBJDIR)/hll_tests.o
+tests: $(OBJDIR)/tests.o $(OBJDIR)/hll_tests.o
 	$(LINK.o)
 
 $(OBJDIR)/%.o : $(SRCDIR)/%.c
