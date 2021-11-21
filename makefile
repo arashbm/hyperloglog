@@ -28,7 +28,14 @@ POSTCOMPILE = @mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d && touch $@
 
 LINK.o = $(LD) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
-all: tests
+.PHONY: check
+check: tests
+	./tests
+
+.PHONY: clean
+clean:
+	$(RM) -r $(OBJDIR) $(DEPDIR)
+
 
 record_biases: $(OBJDIR)/record_biases.o
 	$(LINK.o)
