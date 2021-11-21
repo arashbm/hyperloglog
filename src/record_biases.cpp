@@ -5,25 +5,26 @@
 #include <limits>
 #include <iomanip>
 
-#include "../include/hyperloglog.hpp"
+#include "../include/hll/hyperloglog.hpp"
 
-template <unsigned short precision>
-void record_bias(size_t trials, unsigned int points,
+template <uint8_t precision>
+void record_bias(std::size_t trials, std::size_t points,
     std::string out_dir) {
   std::ofstream out;
   out.open(out_dir + std::to_string(precision),
       std::ios::trunc | std::ios::out);
 
-  std::vector<hll::hyperloglog<precision, (unsigned short int)(precision+1)>>
-    hlls(trials, true);
+  using hll_t = hll::hyperloglog<precision, static_cast<uint8_t>(precision+1)>;
 
-  unsigned long max = (1u << precision)*6, inc = std::max(1ul, max/points);
+  std::vector<hll_t> hlls(trials, hll_t(true));
 
+  std::size_t max = (1u << precision)*6;
+  std::size_t inc = std::max(1ul, max/points);
 
   out << "{";
   out << std::setprecision(std::numeric_limits<double>::digits10 + 1);
-  for(unsigned long i = 1; i <= max; i++) {
-    for (size_t j = 0; j < trials; j++)
+  for (std::size_t i = 1; i <= max; i++) {
+    for (std::size_t j = 0; j < trials; j++)
       hlls[j].insert(std::to_string(i) + "-" + std::to_string(j));
 
     if (i%inc == 0) {
@@ -44,9 +45,8 @@ void record_bias(size_t trials, unsigned int points,
 
 
 int main() {
-
-  size_t sample_size = 100'000;
-  unsigned int points = 500;
+  std::size_t sample_size = 100'000;
+  std::size_t points = 500;
   std::string out_dir = "./src/biases/";
 
   record_bias<4>(sample_size, points, out_dir);

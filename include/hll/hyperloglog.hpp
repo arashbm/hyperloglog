@@ -1,20 +1,19 @@
-#ifndef HYPERLOGLOG_H
-#define HYPERLOGLOG_H
+#ifndef INCLUDE_HLL_HYPERLOGLOG_HPP_
+#define INCLUDE_HLL_HYPERLOGLOG_HPP_
 
 
 #include <vector>
 #include <map>
-#include <mutex>
+#include <mutex>  // NOLINT(build/c++11)
 
 namespace hll {
-
   template<typename T>
   struct hash {
     uint64_t operator()(const T&, uint32_t seed) const;
   };
 
-  template <unsigned short int precision=14,
-           unsigned short int sparse_precision=24>
+  template <uint8_t precision = 14,
+           uint8_t sparse_precision = 24>
   class hyperloglog {
     static_assert(precision > 3,
         "Precision should be 4 or greater");
@@ -24,24 +23,27 @@ namespace hll {
         "Sparse precision should be 58 or less");
     static_assert(precision < sparse_precision,
         "Precision should be less than sparse_precision");
-  public:
-    static constexpr unsigned short int dense_prec = precision;
-    static constexpr unsigned short int sparse_prec = sparse_precision;
 
-    hyperloglog(bool create_dense = false, uint32_t seed = 0x5A827999);
-    hyperloglog(const hll::hyperloglog<precision, sparse_precision> &other);
+  public:
+    static constexpr uint8_t dense_prec = precision;
+    static constexpr uint8_t sparse_prec = sparse_precision;
+
+    explicit hyperloglog(
+        bool create_dense = false, uint32_t seed = 0x5A827999);
+    explicit hyperloglog(
+        const hll::hyperloglog<precision, sparse_precision> &other);
 
     template <typename T> void insert(T item);
     void merge(const hll::hyperloglog<precision, sparse_precision> &other);
 
     double estimate() const;
-    double measure_error(unsigned long original_cardinality) const;
+    double measure_error(std::size_t original_cardinality) const;
 
   private:
-    const static std::vector<std::pair<double, double>> bias;
-    constexpr static unsigned long sparse_list_max
+    static const std::vector<std::pair<double, double>> bias;
+    constexpr static std::size_t sparse_list_max
       = (1ul << precision)/sizeof(uint64_t);
-    constexpr static unsigned long temporary_list_max
+    constexpr static std::size_t temporary_list_max
       = sparse_list_max/10;
 
     mutable std::mutex insert_mutex;
@@ -67,15 +69,15 @@ namespace hll {
     std::pair<uint64_t, uint8_t> decode_hash(uint64_t hash) const;
     uint64_t encode_hash(uint64_t index, uint8_t rank) const;
 
-    std::pair<double, unsigned> raw_estimate() const;
-    double linear_estimate(unsigned non_zero) const;
+    std::pair<double, std::size_t> raw_estimate() const;
+    double linear_estimate(std::size_t non_zero) const;
 
     constexpr double threshold() const;
     constexpr double alpha() const;
   };
-}
+}  // namespace hll
 
 
-#include "../src/hyperloglog.tpp"
+#include "../../src/hyperloglog.tpp"
 
-#endif /* HYPERLOGLOG_H */
+#endif  // INCLUDE_HLL_HYPERLOGLOG_HPP_

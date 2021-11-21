@@ -11,10 +11,9 @@
 #include <functional>
 #include <cmath>
 #include <numeric>
-#include <mutex>
 #include <type_traits>
 
-#define RANK_BITS 6 // log2(64)
+#define RANK_BITS 6  // == log2(64)
 
 #include <MurmurHash3.h>
 
@@ -33,21 +32,21 @@ namespace hll {
     }                                               \
   };
 
-  _hll_define_integral_hash(bool)
-  _hll_define_integral_hash(char)
-  _hll_define_integral_hash(signed char)
-  _hll_define_integral_hash(unsigned char)
-  _hll_define_integral_hash(wchar_t)
-  _hll_define_integral_hash(char16_t)
-  _hll_define_integral_hash(char32_t)
-  _hll_define_integral_hash(short)
-  _hll_define_integral_hash(int)
-  _hll_define_integral_hash(long)
-  _hll_define_integral_hash(long long)
-  _hll_define_integral_hash(unsigned short)
-  _hll_define_integral_hash(unsigned int)
-  _hll_define_integral_hash(unsigned long)
-  _hll_define_integral_hash(unsigned long long)
+  _hll_define_integral_hash(bool)  // NOLINT
+  _hll_define_integral_hash(char)  // NOLINT
+  _hll_define_integral_hash(signed char)  // NOLINT
+  _hll_define_integral_hash(unsigned char)  // NOLINT
+  _hll_define_integral_hash(wchar_t)  // NOLINT
+  _hll_define_integral_hash(char16_t)  // NOLINT
+  _hll_define_integral_hash(char32_t)  // NOLINT
+  _hll_define_integral_hash(short)  // NOLINT
+  _hll_define_integral_hash(int)  // NOLINT
+  _hll_define_integral_hash(long)  // NOLINT
+  _hll_define_integral_hash(long long)  // NOLINT
+  _hll_define_integral_hash(unsigned short)  // NOLINT
+  _hll_define_integral_hash(unsigned int)  // NOLINT
+  _hll_define_integral_hash(unsigned long)  // NOLINT
+  _hll_define_integral_hash(unsigned long long)  // NOLINT
 
 #undef _hll_define_integral_hash
 
@@ -67,9 +66,9 @@ namespace hll {
     }                                               \
   };
 
-  _hll_define_floating_point_hash(float)
-  _hll_define_floating_point_hash(double)
-  _hll_define_floating_point_hash(long double)
+  _hll_define_floating_point_hash(float)  // NOLINT
+  _hll_define_floating_point_hash(double)  // NOLINT
+  _hll_define_floating_point_hash(long double)  // NOLINT
 
 #undef _hll_define_floating_point_hash
 
@@ -80,7 +79,7 @@ namespace hll {
       uint64_t hash_out[2];
       murmur3::MurmurHash3_x64_128(
           k.c_str(),
-          (int)k.length()+1,
+          static_cast<int>(k.length())+1,
           seed, hash_out);
       return hash_out[1];
     }
@@ -117,9 +116,9 @@ namespace hll {
     ,
 #include "biases/18"
   };
-}
+}  // namespace hll
 
-template <unsigned short p, unsigned short sp>
+template <uint8_t p, uint8_t sp>
 hll::hyperloglog<p, sp>::hyperloglog(bool create_dense, uint32_t seed)
   : seed(seed) {
   if (create_dense) {
@@ -129,10 +128,9 @@ hll::hyperloglog<p, sp>::hyperloglog(bool create_dense, uint32_t seed)
     sparse = true;
     temporary_list.reserve(temporary_list_max);
   }
-
 }
 
-template <unsigned short p, unsigned short sp>
+template <uint8_t p, uint8_t sp>
 hll::hyperloglog<p, sp>::hyperloglog(const hll::hyperloglog<p, sp> &other) {
   seed = other.seed;
   std::lock_guard<std::mutex>(other.insert_mutex);
@@ -143,10 +141,10 @@ hll::hyperloglog<p, sp>::hyperloglog(const hll::hyperloglog<p, sp> &other) {
 }
 
 
-template <unsigned short p, unsigned short sp>
+template <uint8_t p, uint8_t sp>
 double
 hll::hyperloglog<p, sp>::estimate_bias(double est) const {
-  constexpr size_t k = 6; // K-nn parameter
+  constexpr std::size_t k = 6;  // K-nn parameter
   std::vector<std::pair<double, double>> keys(k);
   auto est_it = std::lower_bound(bias.begin(), bias.end(),
       std::make_pair(est, 0.0));
@@ -165,8 +163,7 @@ hll::hyperloglog<p, sp>::estimate_bias(double est) const {
       std::make_pair(0.0, 0.0),
       [est] (
         std::pair<double, double> t,  // (sum, sum of weights)
-        std::pair<double, double> key // (distance, bias)
-        ) -> std::pair<double, double> {
+        std::pair<double, double> key) {  // (distance, bias)
       return std::make_pair(
         t.first + key.second*1.0/std::abs(key.first-est),
         t.second + 1.0/std::abs(key.first-est));
@@ -175,12 +172,12 @@ hll::hyperloglog<p, sp>::estimate_bias(double est) const {
 }
 
 
-template <unsigned short p, unsigned short sp>
+template <uint8_t p, uint8_t sp>
 const std::vector<std::pair<double, double>>
 hll::hyperloglog<p, sp>::bias = hll::biases[p-4];
 
 
-template <unsigned short p, unsigned short sp>
+template <uint8_t p, uint8_t sp>
 constexpr double
 hll::hyperloglog<p, sp>::alpha() const {
   if (p == 4)
@@ -193,7 +190,7 @@ hll::hyperloglog<p, sp>::alpha() const {
     return 0.7213/(1.0+1.079/(1ul << p));
 }
 
-template <unsigned short p, unsigned short sp>
+template <uint8_t p, uint8_t sp>
 constexpr double
 hll::hyperloglog<p, sp>::threshold() const {
   double thresholds[] = { 10,     20,     40,     80,     220,
@@ -202,21 +199,21 @@ hll::hyperloglog<p, sp>::threshold() const {
   return thresholds[p-4];
 }
 
-template <unsigned short p, unsigned short sp>
-double hll::hyperloglog<p, sp>::linear_estimate(unsigned non_zero) const {
+template <uint8_t p, uint8_t sp>
+double hll::hyperloglog<p, sp>::linear_estimate(std::size_t non_zero) const {
   double m;
   if (sparse)
-    m = (double)(1ul << sp);
+    m = static_cast<double>(1ul << sp);
   else
-    m = (double)(1ul << p);
+    m = static_cast<double>(1ul << p);
 
-  return m*std::log(m/(m-non_zero));
+  return m*std::log(m/(m-static_cast<double>(non_zero)));
 }
 
-template <unsigned short p, unsigned short sp>
+template <uint8_t p, uint8_t sp>
 std::pair<uint64_t, uint8_t>
 hll::hyperloglog<p, sp>::get_hash_rank(uint64_t hash) const {
-  unsigned short precision;
+  uint8_t precision;
   if (sparse)
     precision = sp;
   else
@@ -224,29 +221,28 @@ hll::hyperloglog<p, sp>::get_hash_rank(uint64_t hash) const {
 
   uint64_t index = (uint64_t)(hash >> (sizeof(hash)*8 - precision));
   uint8_t rank = (uint8_t)(std::min(sizeof(hash)*8 - precision,
-      (unsigned long)(__builtin_clzl(hash << precision)) + 1));
+      (std::size_t)(__builtin_clzl(hash << precision)) + 1));
   return std::make_pair(index, rank);
 }
 
-template <unsigned short p, unsigned short sp>
+template <uint8_t p, uint8_t sp>
 uint64_t
 hll::hyperloglog<p, sp>::encode_hash(uint64_t index, uint8_t rank) const {
   return (index << RANK_BITS) | rank;
 }
 
-template <unsigned short p, unsigned short sp>
+template <uint8_t p, uint8_t sp>
 std::pair<uint64_t, uint8_t>
 hll::hyperloglog<p, sp>::decode_hash(uint64_t hash) const {
   uint64_t index = (hash >> RANK_BITS);
-  uint8_t rank = (uint8_t)(((1 << RANK_BITS)-1) & hash); // first 6 bits
+  uint8_t rank = (uint8_t)(((1 << RANK_BITS)-1) & hash);  // first 6 bits
   return std::make_pair(index, rank);
 }
 
 
 
-template <unsigned short p, unsigned short sp>
+template <uint8_t p, uint8_t sp>
 void hll::hyperloglog<p, sp>::merge(const hll::hyperloglog<p, sp> &other) {
-
   if (seed != other.seed)
     throw std::invalid_argument(
         "two counters should have the same seed to merge");
@@ -274,16 +270,14 @@ void hll::hyperloglog<p, sp>::merge(const hll::hyperloglog<p, sp> &other) {
     std::transform(dense.begin(), dense.end(),
         other_dense_begin,
         dense.begin(),
-        [] (const uint8_t a, const uint8_t b) {return std::max(a, b);}
-        );
+        [] (const uint8_t a, const uint8_t b) {return std::max(a, b);});
   }
 }
 
 
-template <unsigned short precision, unsigned short sparse_precision>
+template <uint8_t precision, uint8_t sparse_precision>
 template <typename T>
 void hll::hyperloglog<precision, sparse_precision>::insert(T item) {
-
   uint64_t hash = hll::hash<T>{}(item, seed);
   uint64_t index;
   uint8_t rank;
@@ -300,12 +294,13 @@ void hll::hyperloglog<precision, sparse_precision>::insert(T item) {
 
     if (sparse_list.size() >= sparse_list_max)
       convert_to_dense();
-
-  } else if (rank > dense[index]) dense[index] = rank;
+  } else if (rank > dense[index]) {
+    dense[index] = rank;
+  }
 }
 
 
-template <unsigned short precision, unsigned short sparse_precision>
+template <uint8_t precision, uint8_t sparse_precision>
 void
 hll::hyperloglog<precision, sparse_precision>::merge_temp() {
   std::vector<uint64_t> new_sparse_list = merged_temp_list();
@@ -314,7 +309,7 @@ hll::hyperloglog<precision, sparse_precision>::merge_temp() {
 }
 
 
-template <unsigned short precision, unsigned short sparse_precision>
+template <uint8_t precision, uint8_t sparse_precision>
 std::vector<uint64_t>
 hll::hyperloglog<precision, sparse_precision>::merged_sorted_list(
     const std::vector<uint64_t> sorted_list) const {
@@ -324,7 +319,7 @@ hll::hyperloglog<precision, sparse_precision>::merged_sorted_list(
   auto it2 = sparse_list.begin();
 
   int i = 0;
-  while (it1 != sorted_list.end() and it2 != sparse_list.end()) {
+  while (it1 != sorted_list.end() && it2 != sparse_list.end()) {
     i++;
     uint64_t index1;
     uint8_t rank1;
@@ -358,9 +353,9 @@ hll::hyperloglog<precision, sparse_precision>::merged_sorted_list(
 }
 
 
-template <unsigned short precision, unsigned short sparse_precision>
+template <uint8_t precision, uint8_t sparse_precision>
 std::vector<uint64_t>
-hll::hyperloglog<precision, sparse_precision>::merged_temp_list() const{
+hll::hyperloglog<precision, sparse_precision>::merged_temp_list() const {
   std::vector<uint64_t> temporary_list_copy = temporary_list;
   std::sort(temporary_list_copy.begin(), temporary_list_copy.end());
 
@@ -383,7 +378,7 @@ hll::hyperloglog<precision, sparse_precision>::merged_temp_list() const{
 }
 
 
-template <unsigned short precision, unsigned short sparse_precision>
+template <uint8_t precision, uint8_t sparse_precision>
 std::vector<uint8_t>
 hll::hyperloglog<precision, sparse_precision>::converted_to_dense()
   const {
@@ -411,10 +406,9 @@ hll::hyperloglog<precision, sparse_precision>::converted_to_dense()
   return new_dense;
 }
 
-template <unsigned short precision, unsigned short sparse_precision>
+template <uint8_t precision, uint8_t sparse_precision>
 void
 hll::hyperloglog<precision, sparse_precision>::convert_to_dense() {
-
   dense = converted_to_dense();
 
   temporary_list.clear();
@@ -426,19 +420,18 @@ hll::hyperloglog<precision, sparse_precision>::convert_to_dense() {
 }
 
 
-
-template <unsigned short precision, unsigned short sparse_precision>
-std::pair<double, unsigned>
+template <uint8_t precision, uint8_t sparse_precision>
+std::pair<double, std::size_t>
 hll::hyperloglog<precision, sparse_precision>::raw_estimate() const {
-  if (sparse)
+  if (sparse) {
     throw std::logic_error(
         "`raw_estimate()` does not work with sparse representation.");
-  else {
+  } else {
     double sum = 0;
-    unsigned non_zeros = 0;
-    for(const auto& m_j: dense) {
+    std::size_t non_zeros = 0;
+    for (auto&& m_j: dense) {
       if (m_j > 0) non_zeros += 1;
-      sum += 1.0/(double)((uint64_t)1 << m_j);
+      sum += 1.0/static_cast<double>(1ul << m_j);
     }
 
     return std::make_pair(
@@ -447,15 +440,15 @@ hll::hyperloglog<precision, sparse_precision>::raw_estimate() const {
   }
 }
 
-template <unsigned short precision, unsigned short sparse_precision>
+template <uint8_t precision, uint8_t sparse_precision>
 double
 hll::hyperloglog<precision, sparse_precision>::estimate() const {
   if (sparse) {
     size_t nonzero = merged_temp_list().size();
-    return linear_estimate((unsigned)nonzero);
+    return linear_estimate((std::size_t)nonzero);
   } else {
     double e;
-    unsigned non_zeros;
+    std::size_t non_zeros;
     std::tie(e, non_zeros) = raw_estimate();
 
     if (e <= 5*(1ul << precision))
@@ -475,11 +468,11 @@ hll::hyperloglog<precision, sparse_precision>::estimate() const {
 }
 
 
-template <unsigned short precision, unsigned short sparse_precision>
+template <uint8_t precision, uint8_t sparse_precision>
 double
 hll::hyperloglog<precision, sparse_precision>::measure_error(
-    unsigned long orig_card) const {
+    std::size_t orig_card) const {
   double e;
   std::tie(e, std::ignore) = raw_estimate();
-  return e-(double)orig_card;
+  return e-static_cast<double>(orig_card);
 }
