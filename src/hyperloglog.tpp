@@ -16,7 +16,7 @@
 
 #define RANK_BITS 6 // log2(64)
 
-#include <murmurhash3.h>
+#include <MurmurHash3.h>
 
 
 namespace hll {
