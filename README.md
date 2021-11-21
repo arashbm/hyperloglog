@@ -1,4 +1,4 @@
-# `hll::hyperloglog`: HyperLogLog++ implementation with C++14. [![Actions Status](https://github.com/arashbm/hyperloglog/workflows/Tests/badge.svg)](https://github.com/arashbm/hyperloglog/actions)
+# `hll::hyperloglog`: HyperLogLog++ with C++14 [![Actions Status](https://github.com/arashbm/hyperloglog/workflows/Tests/badge.svg)](https://github.com/arashbm/hyperloglog/actions)
 
 [HyperLogLog][hll] is a probabilistic data structure that can help you estimate
 cardinality of very large multisets with a pre-determined accuracy using
@@ -19,7 +19,7 @@ The more *registers* you use, the more accurate your estimations are going to
 be. Each register is represented here by a `uint8_t`, although a maximum of 6
 bits of each register is ever used. A HyperLogLog data structure with
 2<sup>m</sup> registers has a relative error or 1.04/√m. This means that a
-HyperLogLog data structure with m=12 uses 2<sup>12 registers (~4kB) and has a
+HyperLogLog data structure with m=12 uses 2<sup>12</sup> registers (~4kB) and has a
 relative error of 1.6% for large multisets.
 
 [hll]: https://en.wikipedia.org/wiki/HyperLogLog
