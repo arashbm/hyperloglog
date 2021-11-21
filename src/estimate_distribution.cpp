@@ -7,7 +7,7 @@
 template <unsigned short precision>
 void record_estimates(size_t trials, unsigned int points, size_t max) {
 
-  std::vector<hll::HyperLogLog<precision, 18>> hlls;
+  std::vector<hll::hyperloglog<precision, 18>> hlls;
 
   for (size_t j = 0; j < trials; j++)
     hlls.emplace_back(true);

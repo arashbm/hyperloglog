@@ -5,8 +5,6 @@
 #include <vector>
 #include <map>
 #include <mutex>
-#include <MurmurHash3.h>
-
 
 namespace hll {
 
@@ -17,7 +15,7 @@ namespace hll {
 
   template <unsigned short int precision=14,
            unsigned short int sparse_precision=24>
-  class HyperLogLog {
+  class hyperloglog {
     static_assert(precision > 3,
         "Precision should be 4 or greater");
     static_assert(precision <= 18,
@@ -26,7 +24,20 @@ namespace hll {
         "Sparse precision should be 58 or less");
     static_assert(precision < sparse_precision,
         "Precision should be less than sparse_precision");
+  public:
+    static constexpr unsigned short int dense_prec = precision;
+    static constexpr unsigned short int sparse_prec = sparse_precision;
 
+    hyperloglog(bool create_dense = false, uint32_t seed = 0x5A827999);
+    hyperloglog(const hll::hyperloglog<precision, sparse_precision> &other);
+
+    template <typename T> void insert(T item);
+    void merge(const hll::hyperloglog<precision, sparse_precision> &other);
+
+    double estimate() const;
+    double measure_error(unsigned long original_cardinality) const;
+
+  private:
     const static std::vector<std::pair<double, double>> bias;
     constexpr static unsigned long sparse_list_max
       = (1ul << precision)/sizeof(uint64_t);
@@ -41,14 +52,13 @@ namespace hll {
     std::vector<uint64_t> sparse_list;
     std::vector<uint64_t> temporary_list;
 
-
     std::vector<uint8_t> converted_to_dense() const;
     void convert_to_dense();
     void merge_temp();
 
     std::vector<uint64_t> merged_temp_list() const;
-    std::vector<uint64_t> merged_sorted_list(const std::vector<uint64_t> other)
-      const;
+    std::vector<uint64_t> merged_sorted_list(
+        const std::vector<uint64_t> other) const;
 
     double estimate_bias(double biassed_estimate) const;
 
@@ -62,19 +72,6 @@ namespace hll {
 
     constexpr double threshold() const;
     constexpr double alpha() const;
-
-  public:
-    static constexpr unsigned short int dense_prec = precision;
-    static constexpr unsigned short int sparse_prec = sparse_precision;
-
-    HyperLogLog(bool create_dense = false, uint32_t seed = 0x5A827999);
-    HyperLogLog(const hll::HyperLogLog<precision, sparse_precision> &other);
-
-    template <typename T> void insert(T item);
-    void merge(const hll::HyperLogLog<precision, sparse_precision> &other);
-
-    double estimate() const;
-    double measure_error(unsigned long original_cardinality) const;
   };
 }
 

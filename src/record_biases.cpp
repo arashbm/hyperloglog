@@ -14,7 +14,7 @@ void record_bias(size_t trials, unsigned int points,
   out.open(out_dir + std::to_string(precision),
       std::ios::trunc | std::ios::out);
 
-  std::vector<hll::HyperLogLog<precision, (unsigned short int)(precision+1)>>
+  std::vector<hll::hyperloglog<precision, (unsigned short int)(precision+1)>>
     hlls(trials, true);
 
   unsigned long max = (1u << precision)*6, inc = std::max(1ul, max/points);

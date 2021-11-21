@@ -5,7 +5,7 @@
 constexpr unsigned short p = 18, sp = 25;
 
 TEST_CASE( "counts small sets", "[sparse]" ) {
-  auto h  = hll::HyperLogLog<p, sp>();
+  auto h  = hll::hyperloglog<p, sp>();
   SECTION("small cardinalities") {
     for (int i = 1; i <= 20; i++) {
       h.insert(i);
@@ -35,7 +35,7 @@ TEST_CASE( "counts small sets", "[sparse]" ) {
   }
 
   SECTION("merging sparse counters") {
-    auto h2 = hll::HyperLogLog<p, sp>();
+    auto h2 = hll::hyperloglog<p, sp>();
     for (int i = 1; i<= 20; i++) {
       h.insert(i);
       h2.insert(i+5);
@@ -47,7 +47,7 @@ TEST_CASE( "counts small sets", "[sparse]" ) {
   }
 
   SECTION("merging dense counter into a sparse counter") {
-    auto h2 = hll::HyperLogLog<p, sp>(true);
+    auto h2 = hll::hyperloglog<p, sp>(true);
     for (int i = 1; i<= 20; i++) {
       h.insert(i);
       h2.insert(i+5);
@@ -60,7 +60,7 @@ TEST_CASE( "counts small sets", "[sparse]" ) {
 }
 
 TEST_CASE( "counts large sets", "[dense]" ) {
-  auto h = hll::HyperLogLog<p, sp>(true);
+  auto h = hll::hyperloglog<p, sp>(true);
   unsigned long m = (1ul << p);
   unsigned long count = 10*m;
   long double relative_error = 3.0/std::sqrt(m); // almost 3 sigmas or %99.73
@@ -82,7 +82,7 @@ TEST_CASE( "counts large sets", "[dense]" ) {
   }
 
   SECTION("merging dense counters") {
-    auto h2 = hll::HyperLogLog<p, sp>(true);
+    auto h2 = hll::hyperloglog<p, sp>(true);
     for (int i = 1; i<= 20; i++) {
       h.insert(i);
       h2.insert(i+5);
@@ -94,7 +94,7 @@ TEST_CASE( "counts large sets", "[dense]" ) {
   }
 
   SECTION("merging sparse counter into a dense counter") {
-    auto h2 = hll::HyperLogLog<p, sp>();
+    auto h2 = hll::hyperloglog<p, sp>();
     for (int i = 1; i<= 20; i++) {
       h.insert(i);
       h2.insert(i+5);
@@ -107,7 +107,7 @@ TEST_CASE( "counts large sets", "[dense]" ) {
 }
 
 TEST_CASE( "counts after transitioning from sparse to dense", "[transition]" ) {
-  auto h = hll::HyperLogLog<p, sp>();
+  auto h = hll::hyperloglog<p, sp>();
   unsigned long m = (1ul << p);
   unsigned long count = 10*m;
   long double relative_error = 3.0/std::sqrt(m); // almost 3 sigmas or %99.73
