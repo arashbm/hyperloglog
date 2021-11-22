@@ -131,17 +131,6 @@ hll::hyperloglog<p, sp>::hyperloglog(bool create_dense, uint32_t seed)
 }
 
 template <uint8_t p, uint8_t sp>
-hll::hyperloglog<p, sp>::hyperloglog(const hll::hyperloglog<p, sp> &other) {
-  seed = other.seed;
-  std::lock_guard<std::mutex>(other.insert_mutex);
-  sparse = other.sparse;
-  dense = other.dense;
-  sparse_list = other.sparse_list;
-  temporary_list = other.temporary_list;
-}
-
-
-template <uint8_t p, uint8_t sp>
 double
 hll::hyperloglog<p, sp>::estimate_bias(double est) const {
   constexpr std::size_t k = 6;  // K-nn parameter
@@ -247,10 +236,6 @@ void hll::hyperloglog<p, sp>::merge(const hll::hyperloglog<p, sp> &other) {
     throw std::invalid_argument(
         "two counters should have the same seed to merge");
 
-  // have to make sure other is not == this.
-  std::lock_guard<std::mutex> lock(insert_mutex);
-  std::lock_guard<std::mutex> other_lock(other.insert_mutex);
-
   if (other.sparse && sparse) {
       merge_temp();
       std::vector<uint64_t> other_slist = other.merged_temp_list();
@@ -282,8 +267,6 @@ void hll::hyperloglog<precision, sparse_precision>::insert(T item) {
   uint64_t index;
   uint8_t rank;
   std::tie(index, rank) = get_hash_rank(hash);
-
-  std::lock_guard<std::mutex> lock(insert_mutex);
 
   if (sparse) {
     uint64_t encoded = encode_hash(index, rank);

@@ -4,7 +4,6 @@
 
 #include <vector>
 #include <map>
-#include <mutex>  // NOLINT(build/c++11)
 
 namespace hll {
   template<typename T>
@@ -30,8 +29,6 @@ namespace hll {
 
     explicit hyperloglog(
         bool create_dense = false, uint32_t seed = 0x5A827999);
-    explicit hyperloglog(
-        const hll::hyperloglog<precision, sparse_precision> &other);
 
     template <typename T> void insert(T item);
     void merge(const hll::hyperloglog<precision, sparse_precision> &other);
@@ -45,8 +42,6 @@ namespace hll {
       = (1ul << precision)/sizeof(uint64_t);
     constexpr static std::size_t temporary_list_max
       = sparse_list_max/10;
-
-    mutable std::mutex insert_mutex;
 
     bool sparse;
     uint32_t seed;
