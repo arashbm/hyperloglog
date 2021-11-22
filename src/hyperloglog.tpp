@@ -231,7 +231,8 @@ hll::hyperloglog<T, p, sp>::decode_hash(uint64_t hash) const {
 
 
 template <typename T, uint8_t p, uint8_t sp>
-void hll::hyperloglog<T, p, sp>::merge(const hll::hyperloglog<T, p, sp> &other) {
+void hll::hyperloglog<T, p, sp>::merge(
+    const hll::hyperloglog<T, p, sp> &other) {
   if (seed != other.seed)
     throw std::invalid_argument(
         "two counters should have the same seed to merge");
