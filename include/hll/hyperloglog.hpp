@@ -11,8 +11,10 @@ namespace hll {
     uint64_t operator()(const T&, uint32_t seed) const;
   };
 
-  template <uint8_t precision = 14,
-           uint8_t sparse_precision = 24>
+  template <
+    typename T,
+    uint8_t precision = 14,
+    uint8_t sparse_precision = 24>
   class hyperloglog {
     static_assert(precision > 3,
         "Precision should be 4 or greater");
@@ -30,8 +32,8 @@ namespace hll {
     explicit hyperloglog(
         bool create_dense = false, uint32_t seed = 0x5A827999);
 
-    template <typename T> void insert(T item);
-    void merge(const hll::hyperloglog<precision, sparse_precision> &other);
+    void insert(T item);
+    void merge(const hll::hyperloglog<T, precision, sparse_precision> &other);
 
     double estimate() const;
     double measure_error(std::size_t original_cardinality) const;

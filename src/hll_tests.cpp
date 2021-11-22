@@ -5,7 +5,7 @@
 constexpr uint8_t p = 18, sp = 25;
 
 TEST_CASE("counts small sets", "[sparse]") {
-  hll::hyperloglog<p, sp> h;
+  hll::hyperloglog<std::size_t, p, sp> h;
   SECTION("small cardinalities") {
     for (std::size_t i = 1; i <= 20; i++) {
       h.insert(i);
@@ -35,7 +35,7 @@ TEST_CASE("counts small sets", "[sparse]") {
   }
 
   SECTION("merging sparse counters") {
-    hll::hyperloglog<p, sp> h2;
+    hll::hyperloglog<std::size_t, p, sp> h2;
     for (std::size_t i = 1; i<= 20; i++) {
       h.insert(i);
       h2.insert(i+5);
@@ -47,7 +47,7 @@ TEST_CASE("counts small sets", "[sparse]") {
   }
 
   SECTION("merging dense counter into a sparse counter") {
-    hll::hyperloglog<p, sp> h2(true);
+    hll::hyperloglog<std::size_t, p, sp> h2(true);
     for (std::size_t i = 1; i<= 20; i++) {
       h.insert(i);
       h2.insert(i+5);
@@ -60,7 +60,7 @@ TEST_CASE("counts small sets", "[sparse]") {
 }
 
 TEST_CASE("counts large sets", "[dense]") {
-  hll::hyperloglog<p, sp> h(true);
+  hll::hyperloglog<std::size_t, p, sp> h(true);
   std::size_t m = (1ul << p);
   std::size_t count = 10*m;
   long double relative_error = 3.0/std::sqrt(m);  // almost 3 sigmas or %99.73
@@ -82,7 +82,7 @@ TEST_CASE("counts large sets", "[dense]") {
   }
 
   SECTION("merging dense counters") {
-    hll::hyperloglog<p, sp> h2(true);
+    hll::hyperloglog<std::size_t, p, sp> h2(true);
     for (std::size_t i = 1; i<= 20; i++) {
       h.insert(i);
       h2.insert(i+5);
@@ -94,7 +94,7 @@ TEST_CASE("counts large sets", "[dense]") {
   }
 
   SECTION("merging sparse counter into a dense counter") {
-    hll::hyperloglog<p, sp> h2;
+    hll::hyperloglog<std::size_t, p, sp> h2;
     for (std::size_t i = 1; i<= 20; i++) {
       h.insert(i);
       h2.insert(i+5);
@@ -107,7 +107,7 @@ TEST_CASE("counts large sets", "[dense]") {
 }
 
 TEST_CASE("counts after transitioning from sparse to dense", "[transition]") {
-  hll::hyperloglog<p, sp> h;
+  hll::hyperloglog<std::size_t, p, sp> h;
   std::size_t m = (1ul << p);
   std::size_t count = 10*m;
   long double relative_error = 3.0/std::sqrt(m);  // almost 3 sigmas or %99.73

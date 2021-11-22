@@ -19,8 +19,8 @@ The more *registers* you use, the more accurate your estimations are going to
 be. Each register is represented here by a `uint8_t`, although a maximum of 6
 bits of each register is ever used. A HyperLogLog data structure with
 2<sup>m</sup> registers has a relative error or 1.04/√m. This means that a
-HyperLogLog data structure with m=12 uses 2<sup>12</sup> registers (~4kB) and has a
-relative error of 1.6% for large multisets.
+HyperLogLog data structure with m=12 uses 2<sup>12</sup> registers (~4kB) and
+has a relative error of 1.6% for large multisets.
 
 [hll]: https://en.wikipedia.org/wiki/HyperLogLog
 
@@ -45,7 +45,7 @@ $ make check
 #include <hll/hyperloglog.hpp>
 
 int main() {
-  hll::hyperloglog<18, 25> h;
+  hll::hyperloglog<std::size_t, 18, 25> h;
 
   for (std::size_t i = 1; i <= 10'000'000ul; i++)
     h.insert(i);

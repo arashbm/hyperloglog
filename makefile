@@ -40,7 +40,6 @@ lint:
 clean:
 	$(RM) -r $(OBJDIR) $(DEPDIR)
 
-
 record_biases: $(OBJDIR)/record_biases.o
 	$(LINK.o)
 
