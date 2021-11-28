@@ -31,6 +31,4 @@
 *.out
 *.app
 
-record_biases
-tests
-estimate_distribution
+build

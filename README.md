@@ -24,21 +24,33 @@ has a relative error of 1.6% for large multisets.
 
 [hll]: https://en.wikipedia.org/wiki/HyperLogLog
 
-## Getting Started
+## Installation
+This package relies on cmake. Make sure a moderatly recent version (3.14 or
+newer) is already installed. You should also have a C++ compiler with C++14
+support. We regularly test this with GCC 8.4 so anything more recent should do.
 
-Clone the library:
+
+Here is how to build and run the tests:
 ```bash
 $ git clone https://github.com/arashbm/hyperloglog.git
-```
-
-Compile and run the tests:
-```
 $ cd hyperloglog
-$ make check
+$ mkdir build  # make directory to build in
+$ cd build
+$ cmake ..
+$ cmake --build . --target tests  # build the tests
+$ ./tests
 ```
 
-## An example
+
+At this point you should see "All tests passed" if all the steps are successful.
+You can continue by install the library on your system:
+```bash
+cmake --build . --target install
 ```
+This final step might require admin previlages.
+
+## Example
+```cpp
 // in "example.cpp"
 
 #include <iostream>
@@ -55,14 +67,11 @@ int main() {
 }
 ```
 
-Assuming you cloned this library in `/path/to/hyperloglog` you can compile
+Assuming you have installed the library as instructed above, you can compile
 and run `example.cpp` with:
 
 ```bash
-$ g++ -std=c++14 \
-    -I /path/to/hyperloglog/include \
-    -isystem /path/to/hyperloglog/dep/MurmurHash3/include \
-    -o example example.cpp
+$ g++ -std=c++14 -o example example.cpp
 $ time ./example
 Estimate is 1.00296e+07
 

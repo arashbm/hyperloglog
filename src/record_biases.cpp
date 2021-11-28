@@ -14,7 +14,8 @@ void record_bias(std::size_t trials, std::size_t points,
   out.open(out_dir + std::to_string(precision),
       std::ios::trunc | std::ios::out);
 
-  using hll_t = hll::hyperloglog<precision, static_cast<uint8_t>(precision+1)>;
+  using hll_t = hll::hyperloglog<
+    std::string, precision, static_cast<uint8_t>(precision+1)>;
 
   std::vector<hll_t> hlls(trials, hll_t(true));
 

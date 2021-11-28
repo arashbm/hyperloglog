@@ -24,9 +24,9 @@ namespace hll {
   struct hash<_Tp> {                                \
     uint64_t                                        \
     operator()(                                     \
-        const _Tp & k, uint32_t seed) const { \
+        const _Tp & k, uint32_t seed) const {       \
       uint64_t hash_out[2];                         \
-      murmur3::MurmurHash3_x64_128(&k, sizeof(k),   \
+      MurmurHash3_x64_128(&k, sizeof(k),            \
           seed, hash_out);                          \
       return hash_out[1];                           \
     }                                               \
@@ -56,10 +56,10 @@ namespace hll {
   struct hash<_Tp> {                                \
     uint64_t                                        \
     operator()(                                     \
-        const _Tp & k, uint32_t seed) const { \
+        const _Tp & k, uint32_t seed) const {       \
       _Tp zero = 0.0;                               \
       uint64_t hash_out[2];                         \
-      murmur3::MurmurHash3_x64_128(                 \
+      MurmurHash3_x64_128(                          \
           ((k == 0.0) ? &zero : &k),                \
           sizeof(k), seed, hash_out);               \
       return hash_out[1];                           \
@@ -77,7 +77,7 @@ namespace hll {
     uint64_t
     operator()(const std::string& k, uint32_t seed) const {
       uint64_t hash_out[2];
-      murmur3::MurmurHash3_x64_128(
+      MurmurHash3_x64_128(
           k.c_str(),
           static_cast<int>(k.length())+1,
           seed, hash_out);

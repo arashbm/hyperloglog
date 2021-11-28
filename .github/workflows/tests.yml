@@ -11,10 +11,16 @@ jobs:
       run: |
         sudo apt-get -qy update
         sudo apt-get install g++-8
-    - uses: actions/checkout@v1
-      with:
-        submodules: true
+    - uses: actions/checkout@v2
     - name: g++ version
       run: g++-8 -v
+    - name: cmake build
+      env:
+        CC: g++-8
+        CXX: g++-8
+      run: |
+        mkdir build
+        cmake -Bbuild -H.
+        cmake --build build/ --target tests
     - name: Run tests
-      run: make CXX=g++-8 check
+      run: build/tests

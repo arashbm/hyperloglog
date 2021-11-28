@@ -1,6 +1,6 @@
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
-#include "../include/hll/hyperloglog.hpp"
+#include <hll/hyperloglog.hpp>
 
 constexpr uint8_t p = 18, sp = 25;
 
@@ -10,25 +10,15 @@ TEST_CASE("counts small sets", "[sparse]") {
     for (std::size_t i = 1; i <= 20; i++) {
       h.insert(i);
       double est = h.estimate();
-      REQUIRE(est < i+1);
-      REQUIRE(i-1 < est);
+      REQUIRE(est < static_cast<double>(i+1));
+      REQUIRE(static_cast<double>(i-1) < est);
     }
   }
 
   SECTION("only counting distincts") {
     for (std::size_t i = 0; i < 20; i++)
-      for (int j = 1; j <= 20; j++)
+      for (std::size_t j = 1; j <= 20; j++)
         h.insert(j);
-    double est = h.estimate();
-    REQUIRE(est < 21);
-    REQUIRE(19 < est);
-  }
-
-  SECTION("merging with itself shouldn't deadlock") {
-    for (std::size_t i = 1; i<= 20; i++) {
-      h.insert(i);
-    }
-    h.merge(h);
     double est = h.estimate();
     REQUIRE(est < 21);
     REQUIRE(19 < est);

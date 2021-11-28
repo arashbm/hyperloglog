@@ -9,7 +9,7 @@ void record_estimates(
     std::size_t trials,
     std::size_t points,
     std::size_t max) {
-  std::vector<hll::hyperloglog<precision, 18>> hlls;
+  std::vector<hll::hyperloglog<std::string, precision, 18>> hlls;
 
   for (size_t j = 0; j < trials; j++)
     hlls.emplace_back(true);
