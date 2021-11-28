@@ -37,8 +37,8 @@ $ cd hyperloglog
 $ mkdir build  # make directory to build in
 $ cd build
 $ cmake ..
-$ cmake --build . --target tests  # build the tests
-$ ./tests
+$ cmake --build . --target hyperloglog_tests  # build the tests
+$ ./hyperloglog_tests
 ```
 
 

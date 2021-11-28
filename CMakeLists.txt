@@ -42,10 +42,13 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(Catch2)
 
-add_executable(tests EXCLUDE_FROM_ALL src/tests.cpp src/hll_tests.cpp)
-target_link_libraries(tests PRIVATE ${PROJECT_NAME})
-target_link_libraries(tests PRIVATE Catch2::Catch2)
-target_compile_options(tests PRIVATE
+add_executable(
+  ${PROJECT_NAME}_tests
+  EXCLUDE_FROM_ALL
+  src/tests.cpp src/hll_tests.cpp)
+target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME}_tests PRIVATE Catch2::Catch2)
+target_compile_options(${PROJECT_NAME}_tests PRIVATE
   -Werror -Wall -Wextra -Wconversion -Wsign-conversion)
 
 
