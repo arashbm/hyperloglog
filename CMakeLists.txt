@@ -14,7 +14,8 @@ target_include_directories(
   $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}>/dep/MurmurHash3/include/
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 target_compile_options(murmurhash3 PUBLIC
-  -Werror -Wall -Wextra -Wconversion -Wno-implicit-fallthrough)
+  -Werror -Wall -Wextra -Wconversion
+  -Wno-sign-conversion -Wno-implicit-fallthrough)
 
 
 add_library(${PROJECT_NAME} INTERFACE)
