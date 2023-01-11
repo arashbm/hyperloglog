@@ -31,7 +31,7 @@ namespace hll {
 
     explicit hyperloglog(
         bool create_dense = false,
-        std::uint64_t seed = 0x5A827999);
+        std::uint64_t seed = 0x9E3779B97F4A7C15);
 
     void insert(T item);
     void merge(const hll::hyperloglog<T, precision, sparse_precision>& other);
