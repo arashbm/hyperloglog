@@ -19,6 +19,7 @@ else()
   target_compile_options(murmurhash3 PUBLIC
     -Werror -Wall -Wextra -Wconversion
     -Wno-sign-conversion -Wno-implicit-fallthrough)
+endif()
 
 
 add_library(${PROJECT_NAME} INTERFACE)
@@ -57,7 +58,7 @@ if(MSVC)
 else()
   target_compile_options(${PROJECT_NAME}_tests PRIVATE
     -Werror -Wall -Wextra -Wconversion -Wsign-conversion)
-
+endif()
 
 install(
   TARGETS ${PROJECT_NAME} murmurhash3
