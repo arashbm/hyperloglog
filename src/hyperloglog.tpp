@@ -192,6 +192,13 @@ bool hll::hyperloglog<T, p, sp>::is_sparse() const {
 }
 
 template <typename T, std::uint8_t p, std::uint8_t sp>
+const std::vector<std::uint8_t>&
+hll::hyperloglog<T, p, sp>::dense_vec() const {
+  return dense;
+}
+
+
+template <typename T, std::uint8_t p, std::uint8_t sp>
 double hll::hyperloglog<T, p, sp>::linear_estimate(std::size_t non_zero) const {
   double m;
   if (sparse)

@@ -138,9 +138,15 @@ std::pair<std::uint64_t, std::uint8_t> get_hash_rank(std::uint64_t hash) {
 }
 
 TEST_CASE("The weird case of 350285", "[WTF]") {
+  hll::hyperloglog<std::size_t, p, sp> h;
+  for (std::size_t i = 1; i < 350284; i++)
+    h.insert(i);
+
+  std::cerr << "estimate: " << h.estimate() << std::endl;
   std::uint64_t seed = 0x9E3779B97F4A7C15ul;
 
   std::size_t item = 350284;
+  std::cerr << "item: " << item << std::endl;
   std::uint64_t hash = hll::hash<std::size_t>{}(item, seed);
   std::cerr << "hash: " << hash << std::endl;
 
@@ -149,13 +155,26 @@ TEST_CASE("The weird case of 350285", "[WTF]") {
   std::tie(index, rank) = get_hash_rank(hash);
   std::cerr << "index: " << index <<
     " rank: " << (std::uint64_t)rank << std::endl;
+  std::cerr << "current_rank: " <<
+    (std::uint64_t)h.dense_vec()[index] << std::endl;
+  h.insert(item);
+  std::cerr << "current_rank: " <<
+    (std::uint64_t)h.dense_vec()[index] << std::endl;
+  std::cerr << "estimate: " << h.estimate() << std::endl;
 
   item = 350285;
+  std::cerr << "item: " << item << std::endl;
   hash = hll::hash<std::size_t>{}(item, seed);
   std::cerr << "hash: " << hash << std::endl;
   std::tie(index, rank) = get_hash_rank(hash);
   std::cerr << "index: " << index <<
     " rank: " << (std::uint64_t)rank << std::endl;
+  std::cerr << "current_rank: " <<
+    (std::uint64_t)h.dense_vec()[index] << std::endl;
+  h.insert(item);
+  std::cerr << "current_rank: " <<
+    (std::uint64_t)h.dense_vec()[index] << std::endl;
+  std::cerr << "estimate: " << h.estimate() << std::endl;
 }
 
 TEST_CASE("counts after transitioning from sparse to dense", "[transition]") {
@@ -179,7 +198,7 @@ TEST_CASE("counts after transitioning from sparse to dense", "[transition]") {
   SECTION("large cardinalities") {
     for (std::size_t i = 1; i <= count/5; i++) {
       h.insert(i);
-      if (i > 350280 && i < 350390) {
+      if (i > 350280 && i < 350290) {
         double est = h.estimate();
         std::cerr << i << " " << h.is_sparse() << " " <<
           i*(1.0 - relative_error) << " " << est << " " <<

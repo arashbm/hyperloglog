@@ -39,6 +39,7 @@ namespace hll {
     bool is_sparse() const;
     double estimate() const;
     double measure_error(std::size_t original_cardinality) const;
+    const std::vector<std::uint8_t>& dense_vec() const;
 
   private:
     static const std::vector<std::pair<double, double>> bias;
