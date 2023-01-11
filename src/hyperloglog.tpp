@@ -13,7 +13,7 @@
 #include <numeric>
 #include <type_traits>
 
-// switch to std::countl_zero when only supporting 
+// switch to std::countl_zero when only supporting c++ > 20
 #ifdef _MSC_VER
   #define hll_countl_zero __lzcnt64
 #else
