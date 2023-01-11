@@ -59,7 +59,7 @@ if(MSVC)
 else()
   target_compile_options(${PROJECT_NAME}_tests PRIVATE
     -Werror -Wall -Wextra -Wconversion -Wsign-conversion
-    -fsanitize=address,undefined)
+    -fsanitize=address,undefined -g)
   target_link_options(${PROJECT_NAME}_tests PRIVATE
     -fsanitize=address,undefined)
 endif()
