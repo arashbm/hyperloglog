@@ -1,5 +1,7 @@
 #include <catch2/catch.hpp>
 
+#include <iostream>
+
 #include <hll/murmurhash.hpp>
 
 TEST_CASE("MurmurHash3 implementation", "[murmurhash]") {
@@ -125,6 +127,7 @@ TEST_CASE("counts after transitioning from sparse to dense", "[transition]") {
       h.insert(i);
       if (i % (count/100) == 0) {
         double est = h.estimate();
+        std::cerr << i << " " << est << std::endl;
         REQUIRE(est < i*(1.0 + relative_error));
         REQUIRE(i*(1.0 - relative_error) < est);
       }
