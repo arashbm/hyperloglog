@@ -214,7 +214,8 @@ hll::hyperloglog<T, p, sp>::get_hash_rank(std::uint64_t hash) const {
 
 template <typename T, std::uint8_t p, std::uint8_t sp>
 uint64_t
-hll::hyperloglog<T, p, sp>::encode_hash(std::uint64_t index, std::uint8_t rank) const {
+hll::hyperloglog<T, p, sp>::encode_hash(
+    std::uint64_t index, std::uint8_t rank) const {
   return (index << rank_bits) | rank;
 }
 
@@ -222,7 +223,7 @@ template <typename T, std::uint8_t p, std::uint8_t sp>
 std::pair<std::uint64_t, std::uint8_t>
 hll::hyperloglog<T, p, sp>::decode_hash(std::uint64_t hash) const {
   std::uint64_t index = (hash >> rank_bits);
-  std::uint8_t rank = (std::uint8_t)(((1 << rank_bits)-1) & hash);  // first 6 bits
+  std::uint8_t rank = (std::uint8_t)(((1 << rank_bits)-1) & hash);
   return std::make_pair(index, rank);
 }
 
@@ -254,7 +255,9 @@ void hll::hyperloglog<T, p, sp>::merge(
     std::transform(dense.begin(), dense.end(),
         other_dense_begin,
         dense.begin(),
-        [] (const std::uint8_t a, const std::uint8_t b) {return std::max(a, b);});
+        [] (const std::uint8_t a, const std::uint8_t b) {
+          return std::max(a, b);
+        });
   }
 }
 

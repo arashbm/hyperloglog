@@ -3,7 +3,7 @@
 #define HLL_FORCE_INLINE __forceinline
 
 #include <stdlib.h>
-#define HLL_ROTL64(x,y) _rotl64(x,y)
+#define HLL_ROTL64(x, y) _rotl64(x, y)
 #else
 #define HLL_FORCE_INLINE inline __attribute__((always_inline))
 namespace hll {
@@ -13,7 +13,7 @@ namespace hll {
     }
   }  // namespace detail
 }  // namespace hll
-#define HLL_ROTL64(x,y) ::hll::detail::rotl64(x,y)
+#define HLL_ROTL64(x, y) ::hll::detail::rotl64(x, y)
 #endif
 
 namespace hll {
@@ -32,7 +32,7 @@ namespace hll {
 
       return k;
     }
-  }
+  }  // namespace detail
 
   // Based on the reference MurmurHash3 implementation by Austin Appleby.
   std::uint64_t murmurhash3_x64_128(
@@ -49,9 +49,9 @@ namespace hll {
 
     const std::uint64_t* blocks = (const std::uint64_t*)(data);
 
-    for(int i = 0; i < nblocks; i++) {
-      std::uint64_t k1 = detail::getblock64(blocks,i*2+0);
-      std::uint64_t k2 = detail::getblock64(blocks,i*2+1);
+    for (int i = 0; i < nblocks; i++) {
+      std::uint64_t k1 = detail::getblock64(blocks, i*2+0);
+      std::uint64_t k2 = detail::getblock64(blocks, i*2+1);
 
       k1 *= c1;
       k1 = HLL_ROTL64(k1, 31);
@@ -77,7 +77,7 @@ namespace hll {
     std::uint64_t k1 = 0;
     std::uint64_t k2 = 0;
 
-    switch(len & 15) {
+    switch (len & 15) {
     case 15: k2 ^= ((std::uint64_t)tail[14]) << 48;
     case 14: k2 ^= ((std::uint64_t)tail[13]) << 40;
     case 13: k2 ^= ((std::uint64_t)tail[12]) << 32;
@@ -96,7 +96,7 @@ namespace hll {
     case  2: k1 ^= ((std::uint64_t)tail[ 1]) << 8;
     case  1: k1 ^= ((std::uint64_t)tail[ 0]) << 0;
             k1 *= c1; k1  = HLL_ROTL64(k1, 31); k1 *= c2; h1 ^= k1;
-    };
+    }
 
 
     h1 ^= (std::uint64_t)len;
@@ -110,4 +110,4 @@ namespace hll {
 
     return h1 + h2;
   }
-}
+}  // namespace hll
