@@ -213,8 +213,8 @@ hll::hyperloglog<T, p, sp>::get_hash_rank(std::uint64_t hash) const {
 
   std::uint64_t index = (std::uint64_t)(hash >> (sizeof(hash)*8 - precision));
 
-  std::uint64_t h = hash << precision;
   std::uint8_t rank = static_cast<std::uint8_t>(sizeof(hash)*8 - precision);
+  std::uint64_t h = hash << precision;
   if (h > 0)
     rank = std::min(rank, static_cast<std::uint8_t>(hll_countl_zero(h) + 1));
   return std::make_pair(index, rank);
