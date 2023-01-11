@@ -39,6 +39,7 @@ namespace hll {
     bool is_sparse() const;
     double estimate() const;
     double measure_error(std::size_t original_cardinality) const;
+
   private:
     static const std::vector<std::pair<double, double>> bias;
     constexpr static std::size_t sparse_list_max
