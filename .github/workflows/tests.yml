@@ -3,21 +3,33 @@ on: [push, pull_request]
 
 jobs:
   build:
+    name: ${ { matrix.config.name } }
+    runs-on: ${ { matrix.config.os } }
 
-    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, windows-2022, macos-12]
 
     steps:
-    - name: Install GCC 8
+    - name: Install Pre-requisits on ubuntu
+      if: startsWith(matrix.config.os, 'ubuntu')
       run: |
         sudo apt-get -qy update
-        sudo apt-get install g++-8
+        sudo apt-get install g++ ninja-build cmake
+        ninja --version
+        cmake --version
+        g++ --version
+
+    - name: Install dependencies on windows
+      if: startsWith(matrix.config.os, 'windows')
+      run: |
+        choco install ninja cmake
+        ninja --version
+        cmake --version
+
     - uses: actions/checkout@v2
-    - name: g++ version
-      run: g++-8 -v
     - name: cmake build
-      env:
-        CC: g++-8
-        CXX: g++-8
       run: |
         mkdir build
         cmake -Bbuild -H.
