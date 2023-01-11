@@ -1,5 +1,24 @@
 #include <catch2/catch.hpp>
 
+#include <hll/murmurhash.hpp>
+
+TEST_CASE("MurmurHash3 implementation", "[murmurhash]") {
+  std::string data = "The quick brown fox jumps over the lazy dog";
+  std::uint64_t seed = 0;
+  REQUIRE(
+      hll::murmurhash3_x64_128(
+        data.c_str(),
+        static_cast<int>(data.size()),
+        seed) == 16378391709484522348UL);
+
+  std::string data2 = "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG";
+  REQUIRE(
+      hll::murmurhash3_x64_128(
+        data2.c_str(),
+        static_cast<int>(data2.size()),
+        seed) == 11970594202964392905UL);
+}
+
 #include <hll/hyperloglog.hpp>
 
 constexpr uint8_t p = 18, sp = 25;
