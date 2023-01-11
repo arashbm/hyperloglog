@@ -16,11 +16,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
   SOVERSION ${PROJECT_VERSION})
 if(MSVC)
   target_compile_options(${PROJECT_NAME} PRIVATE
-    /W4 /O2)
+    /W4)
 else()
   target_compile_options(${PROJECT_NAME} PRIVATE
   -Werror -Wall -Wextra -Wconversion -Wsign-conversion
-  -Wno-implicit-fallthrough -O3)
+  -Wno-implicit-fallthrough)
 endif()
 
 
