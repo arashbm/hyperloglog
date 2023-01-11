@@ -28,7 +28,7 @@ jobs:
         ninja --version
         cmake --version
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: cmake build
       run: |
         mkdir build
@@ -37,7 +37,10 @@ jobs:
 
     - name: Run tests (Windows)
       if: ${{ startsWith(matrix.os, 'windows') }}
-      run: build\Debug\hyperloglog_tests.exe
+      run: |
+        ls build
+        ls Debug
+        build\Debug\hyperloglog_tests.exe
 
     - name: Run tests (not Windows)
       if: ${{ !startsWith(matrix.os, 'windows') }}
