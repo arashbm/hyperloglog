@@ -187,6 +187,11 @@ hll::hyperloglog<T, p, sp>::threshold() const {
 }
 
 template <typename T, std::uint8_t p, std::uint8_t sp>
+bool hll::hyperloglog<T, p, sp>::is_sparse() const {
+  return sparse;
+}
+
+template <typename T, std::uint8_t p, std::uint8_t sp>
 double hll::hyperloglog<T, p, sp>::linear_estimate(std::size_t non_zero) const {
   double m;
   if (sparse)

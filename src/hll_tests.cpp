@@ -122,12 +122,27 @@ TEST_CASE("counts after transitioning from sparse to dense", "[transition]") {
   std::size_t m = (1ul << p);
   std::size_t count = 10*m;
   long double relative_error = 3.0/std::sqrt(m);  // almost 3 sigmas or %99.73
+
+  SECTION("coorectly transitions") {
+    hll::hyperloglog<std::size_t, p, sp> h2(true);
+    for (std::size_t i = 1; h.is_sparse(); i++) {
+      h.insert(i);
+      h2.insert(i);
+    }
+    std::cerr << "h " << h.estimate() << "h2 " << h2.estimate() << std::endl;
+    REQUIRE(h.estimate() == h2.estimate());
+
+    h2.merge(h);
+    std::cerr << "h " << h.estimate() << "h2 " << h2.estimate() << std::endl;
+    REQUIRE(h.estimate() == h2.estimate());
+  }
+
   SECTION("large cardinalities") {
-    for (std::size_t i = 1; i <= count ; i++) {
+    for (std::size_t i = 1; i <= count; i++) {
       h.insert(i);
       if (i % (count/100) == 0) {
         double est = h.estimate();
-        std::cerr << i << " " << est << std::endl;
+        std::cerr << i << " " << h.is_sparse() << " " << est << std::endl;
         REQUIRE(est < i*(1.0 + relative_error));
         REQUIRE(i*(1.0 - relative_error) < est);
       }

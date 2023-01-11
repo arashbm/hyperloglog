@@ -36,9 +36,9 @@ namespace hll {
     void insert(T item);
     void merge(const hll::hyperloglog<T, precision, sparse_precision>& other);
 
+    bool is_sparse() const;
     double estimate() const;
     double measure_error(std::size_t original_cardinality) const;
-
   private:
     static const std::vector<std::pair<double, double>> bias;
     constexpr static std::size_t sparse_list_max
