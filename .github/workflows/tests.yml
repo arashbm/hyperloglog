@@ -13,7 +13,7 @@ jobs:
 
     steps:
     - name: Install Pre-requisits on ubuntu
-      if: startsWith(matrix.os, 'ubuntu')
+      if: ${{ startsWith(matrix.os, 'ubuntu') }}
       run: |
         sudo apt-get -qy update
         sudo apt-get install g++ ninja-build cmake
@@ -22,7 +22,7 @@ jobs:
         g++ --version
 
     - name: Install dependencies on windows
-      if: startsWith(matrix.os, 'windows')
+      if: ${{ startsWith(matrix.os, 'windows') }}
       run: |
         choco install ninja cmake
         ninja --version
@@ -35,10 +35,10 @@ jobs:
         cmake -Bbuild -S.
         cmake --build build/ --target hyperloglog_tests
 
-    - name: Run tests
-      if: startsWith(matrix.os, 'windows')
+    - name: Run tests (Windows)
+      if: ${{ startsWith(matrix.os, 'windows') }}
       run: build/Debug/hyperloglog_tests.exe
 
-    - name: Run tests
-      if: !startsWith(matrix.os, 'windows')
+    - name: Run tests (not Windows)
+      if: ${{ !startsWith(matrix.os, 'windows') }}
       run: build/hyperloglog_tests
