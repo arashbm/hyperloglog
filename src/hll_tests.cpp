@@ -11,14 +11,20 @@ TEST_CASE("MurmurHash3 implementation", "[murmurhash]") {
       hll::murmurhash3_x64_128(
         data.c_str(),
         static_cast<int>(data.size()),
-        seed) == 16378391709484522348UL);
+        seed) == 16378391709484522348ul);
 
   std::string data2 = "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG";
   REQUIRE(
       hll::murmurhash3_x64_128(
         data2.c_str(),
         static_cast<int>(data2.size()),
-        seed) == 11970594202964392905UL);
+        seed) == 11970594202964392905ul);
+
+  std::uint64_t number = 350285;
+  std::uint64_t seed2 = 0x9E3779B97F4A7C15ul;
+  REQUIRE(
+      hll::murmurhash3_x64_128(
+        &number, sizeof(number), seed2) == 8023538134681085539ul);
 }
 
 #include <hll/hyperloglog.hpp>
@@ -117,6 +123,34 @@ TEST_CASE("counts large sets", "[dense]") {
   }
 }
 
+
+std::pair<std::uint64_t, std::uint8_t> get_hash_rank(std::uint64_t hash) {
+  std::uint8_t precision;
+  precision = p;
+
+  std::uint64_t index = (std::uint64_t)(hash >> (sizeof(hash)*8 - precision));
+
+  std::uint8_t rank = static_cast<std::uint8_t>(sizeof(hash)*8 - precision);
+  std::uint64_t h = hash << precision;
+  if (h > 0)
+    rank = std::min(rank, static_cast<std::uint8_t>(hll_countl_zero(h) + 1));
+  return std::make_pair(index, rank);
+}
+
+TEST_CASE("The weird case of 350285", "[WTF]") {
+  std::size_t item = 350285;
+  std::uint64_t index;
+  std::uint8_t rank;
+
+  std::uint64_t seed = 0x9E3779B97F4A7C15ul;
+  std::uint64_t hash = hll::hash<std::size_t>{}(item, seed);
+  std::cerr << "hash: " << hash << std::endl;
+
+  std::tie(index, rank) = get_hash_rank(hash);
+  std::cerr << "index: " << index <<
+    " rank: " << (std::uint64_t)rank << std::endl;
+}
+
 TEST_CASE("counts after transitioning from sparse to dense", "[transition]") {
   hll::hyperloglog<std::size_t, p, sp> h;
   std::size_t m = (1ul << p);
@@ -138,7 +172,7 @@ TEST_CASE("counts after transitioning from sparse to dense", "[transition]") {
   SECTION("large cardinalities") {
     for (std::size_t i = 1; i <= count/5; i++) {
       h.insert(i);
-      if (i > 350200 && i < 350300) {
+      if (i > 350280 && i < 350390) {
         double est = h.estimate();
         std::cerr << i << " " << h.is_sparse() << " " <<
           i*(1.0 - relative_error) << " " << est << " " <<
