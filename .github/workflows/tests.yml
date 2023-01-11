@@ -34,5 +34,11 @@ jobs:
         mkdir build
         cmake -Bbuild -S.
         cmake --build build/ --target hyperloglog_tests
+
     - name: Run tests
+      if: startsWith(matrix.os, 'windows')
+      run: build/Debug/hyperloglog_tests.exe
+
+    - name: Run tests
+      if: !startsWith(matrix.os, 'windows')
       run: build/hyperloglog_tests
