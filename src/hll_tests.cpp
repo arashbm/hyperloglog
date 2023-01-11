@@ -138,14 +138,21 @@ std::pair<std::uint64_t, std::uint8_t> get_hash_rank(std::uint64_t hash) {
 }
 
 TEST_CASE("The weird case of 350285", "[WTF]") {
-  std::size_t item = 350285;
-  std::uint64_t index;
-  std::uint8_t rank;
-
   std::uint64_t seed = 0x9E3779B97F4A7C15ul;
+
+  std::size_t item = 350284;
   std::uint64_t hash = hll::hash<std::size_t>{}(item, seed);
   std::cerr << "hash: " << hash << std::endl;
 
+  std::uint64_t index;
+  std::uint8_t rank;
+  std::tie(index, rank) = get_hash_rank(hash);
+  std::cerr << "index: " << index <<
+    " rank: " << (std::uint64_t)rank << std::endl;
+
+  item = 350285;
+  hash = hll::hash<std::size_t>{}(item, seed);
+  std::cerr << "hash: " << hash << std::endl;
   std::tie(index, rank) = get_hash_rank(hash);
   std::cerr << "index: " << index <<
     " rank: " << (std::uint64_t)rank << std::endl;
