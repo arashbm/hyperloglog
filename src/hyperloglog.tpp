@@ -13,18 +13,25 @@
 #include <numeric>
 #include <type_traits>
 
-#define RANK_BITS 6  // == log2(64)
+// switch to std::countl_zero when only supporting 
+#ifdef _MSC_VER
+  #define hll_countl_zero __lzcnt64
+#else
+  #define hll_countl_zero __builtin_clzl
+#endif
+
+#define HLL_RANK_BITS 6  // == log2(64)
 
 #include <MurmurHash3.h>
 
 
 namespace hll {
-#define _hll_define_integral_hash(_Tp)              \
+#define hll_define_integral_hash(Tp)                \
   template<>                                        \
-  struct hash<_Tp> {                                \
+  struct hash<Tp> {                                 \
     uint64_t                                        \
     operator()(                                     \
-        const _Tp & k, uint32_t seed) const {       \
+        const Tp & k, uint32_t seed) const {        \
       uint64_t hash_out[2];                         \
       MurmurHash3_x64_128(&k, sizeof(k),            \
           seed, hash_out);                          \
@@ -32,32 +39,32 @@ namespace hll {
     }                                               \
   };
 
-  _hll_define_integral_hash(bool)  // NOLINT
-  _hll_define_integral_hash(char)  // NOLINT
-  _hll_define_integral_hash(signed char)  // NOLINT
-  _hll_define_integral_hash(unsigned char)  // NOLINT
-  _hll_define_integral_hash(wchar_t)  // NOLINT
-  _hll_define_integral_hash(char16_t)  // NOLINT
-  _hll_define_integral_hash(char32_t)  // NOLINT
-  _hll_define_integral_hash(short)  // NOLINT
-  _hll_define_integral_hash(int)  // NOLINT
-  _hll_define_integral_hash(long)  // NOLINT
-  _hll_define_integral_hash(long long)  // NOLINT
-  _hll_define_integral_hash(unsigned short)  // NOLINT
-  _hll_define_integral_hash(unsigned int)  // NOLINT
-  _hll_define_integral_hash(unsigned long)  // NOLINT
-  _hll_define_integral_hash(unsigned long long)  // NOLINT
+  hll_define_integral_hash(bool)  // NOLINT
+  hll_define_integral_hash(char)  // NOLINT
+  hll_define_integral_hash(signed char)  // NOLINT
+  hll_define_integral_hash(unsigned char)  // NOLINT
+  hll_define_integral_hash(wchar_t)  // NOLINT
+  hll_define_integral_hash(char16_t)  // NOLINT
+  hll_define_integral_hash(char32_t)  // NOLINT
+  hll_define_integral_hash(short)  // NOLINT
+  hll_define_integral_hash(int)  // NOLINT
+  hll_define_integral_hash(long)  // NOLINT
+  hll_define_integral_hash(long long)  // NOLINT
+  hll_define_integral_hash(unsigned short)  // NOLINT
+  hll_define_integral_hash(unsigned int)  // NOLINT
+  hll_define_integral_hash(unsigned long)  // NOLINT
+  hll_define_integral_hash(unsigned long long)  // NOLINT
 
-#undef _hll_define_integral_hash
+#undef hll_define_integral_hash
 
   // making sure hash(-0.0f) == hash(+0.0f)
-#define _hll_define_floating_point_hash(_Tp)        \
+#define hll_define_floating_point_hash(Tp)          \
   template<>                                        \
-  struct hash<_Tp> {                                \
+  struct hash<Tp> {                                 \
     uint64_t                                        \
     operator()(                                     \
-        const _Tp & k, uint32_t seed) const {       \
-      _Tp zero = 0.0;                               \
+        const Tp & k, uint32_t seed) const {        \
+      Tp zero = 0.0;                                \
       uint64_t hash_out[2];                         \
       MurmurHash3_x64_128(                          \
           ((k == 0.0) ? &zero : &k),                \
@@ -66,9 +73,9 @@ namespace hll {
     }                                               \
   };
 
-  _hll_define_floating_point_hash(float)  // NOLINT
-  _hll_define_floating_point_hash(double)  // NOLINT
-  _hll_define_floating_point_hash(long double)  // NOLINT
+  hll_define_floating_point_hash(float)  // NOLINT
+  hll_define_floating_point_hash(double)  // NOLINT
+  hll_define_floating_point_hash(long double)  // NOLINT
 
 #undef _hll_define_floating_point_hash
 
@@ -210,21 +217,21 @@ hll::hyperloglog<T, p, sp>::get_hash_rank(uint64_t hash) const {
 
   uint64_t index = (uint64_t)(hash >> (sizeof(hash)*8 - precision));
   uint8_t rank = (uint8_t)(std::min(sizeof(hash)*8 - precision,
-      (std::size_t)(__builtin_clzl(hash << precision)) + 1));
+      (std::size_t)(hll_countl_zero(hash << precision)) + 1));
   return std::make_pair(index, rank);
 }
 
 template <typename T, uint8_t p, uint8_t sp>
 uint64_t
 hll::hyperloglog<T, p, sp>::encode_hash(uint64_t index, uint8_t rank) const {
-  return (index << RANK_BITS) | rank;
+  return (index << HLL_RANK_BITS) | rank;
 }
 
 template <typename T, uint8_t p, uint8_t sp>
 std::pair<uint64_t, uint8_t>
 hll::hyperloglog<T, p, sp>::decode_hash(uint64_t hash) const {
-  uint64_t index = (hash >> RANK_BITS);
-  uint8_t rank = (uint8_t)(((1 << RANK_BITS)-1) & hash);  // first 6 bits
+  uint64_t index = (hash >> HLL_RANK_BITS);
+  uint8_t rank = (uint8_t)(((1 << HLL_RANK_BITS)-1) & hash);  // first 6 bits
   return std::make_pair(index, rank);
 }
 
@@ -381,7 +388,7 @@ hll::hyperloglog<T, precision, sparse_precision>::converted_to_dense()
       dense_rank = (uint8_t)(rank + (sparse_precision - precision));
     else
       dense_rank = (uint8_t)
-        (((uint8_t)__builtin_clzl(betweens) -
+        (((uint8_t)hll_countl_zero(betweens) -
           (sizeof(betweens)*8 - (sparse_precision - precision))) + 1);
     if (dense_rank > new_dense[dense_index])
       new_dense[dense_index] = dense_rank;
