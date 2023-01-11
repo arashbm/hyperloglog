@@ -13,9 +13,12 @@ target_include_directories(
   PUBLIC
   $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}>/dep/MurmurHash3/include/
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-target_compile_options(murmurhash3 PUBLIC
-  -Werror -Wall -Wextra -Wconversion
-  -Wno-sign-conversion -Wno-implicit-fallthrough)
+if(MSVC)
+  target_compile_options(murmurhash3 PUBLIC /W4)
+else()
+  target_compile_options(murmurhash3 PUBLIC
+    -Werror -Wall -Wextra -Wconversion
+    -Wno-sign-conversion -Wno-implicit-fallthrough)
 
 
 add_library(${PROJECT_NAME} INTERFACE)
@@ -49,8 +52,11 @@ add_executable(
   src/tests.cpp src/hll_tests.cpp)
 target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME}_tests PRIVATE Catch2::Catch2)
-target_compile_options(${PROJECT_NAME}_tests PRIVATE
-  -Werror -Wall -Wextra -Wconversion -Wsign-conversion)
+if(MSVC)
+  target_compile_options(${PROJECT_NAME}_tests PRIVATE /W4)
+else()
+  target_compile_options(${PROJECT_NAME}_tests PRIVATE
+    -Werror -Wall -Wextra -Wconversion -Wsign-conversion)
 
 
 install(
