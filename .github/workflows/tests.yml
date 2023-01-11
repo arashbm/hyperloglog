@@ -40,8 +40,7 @@ jobs:
       run: |
         ls build
         ls build\Debug
-        chmod +x build\Debug\hyperloglog_tests.exe
-        build\Debug\hyperloglog_tests.exe
+        .\build\Debug\hyperloglog_tests.exe
 
     - name: Run tests (not Windows)
       if: ${{ !startsWith(matrix.os, 'windows') }}
