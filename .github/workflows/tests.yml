@@ -37,7 +37,7 @@ jobs:
 
     - name: Run tests (Windows)
       if: ${{ startsWith(matrix.os, 'windows') }}
-      run: build/Debug/hyperloglog_tests.exe
+      run: build\Debug\hyperloglog_tests.exe
 
     - name: Run tests (not Windows)
       if: ${{ !startsWith(matrix.os, 'windows') }}
