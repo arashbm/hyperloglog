@@ -144,12 +144,13 @@ hll::hyperloglog<T, p, sp>::estimate_bias(double est) const {
   std::vector<std::pair<double, double>> keys(k);
   auto est_it = std::lower_bound(bias.begin(), bias.end(),
       std::make_pair(est, 0.0));
+  std::size_t est_idx = est_it - bias.begin();
   std::partial_sort_copy(
-      std::max(est_it - k, bias.begin()),
-      std::min(est_it + k, bias.end()),
+      est_idx <= k ? bias.begin() : est_it - k,
+      est_idx + k >= bias.size() ? bias.end() : est_it + k,
       keys.begin(), keys.end(),
-      [est] (std::pair<double, double> a,
-              std::pair<double, double> b) {
+      [est] (const std::pair<double, double>& a,
+              const std::pair<double, double>& b) {
               return std::abs(a.first - est) < std::abs(b.first - est);
       });
 
