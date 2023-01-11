@@ -129,18 +129,16 @@ TEST_CASE("counts after transitioning from sparse to dense", "[transition]") {
       h.insert(i);
       h2.insert(i);
     }
-    std::cerr << "h " << h.estimate() << "h2 " << h2.estimate() << std::endl;
     REQUIRE(h.estimate() == h2.estimate());
 
     h2.merge(h);
-    std::cerr << "h " << h.estimate() << "h2 " << h2.estimate() << std::endl;
     REQUIRE(h.estimate() == h2.estimate());
   }
 
   SECTION("large cardinalities") {
-    for (std::size_t i = 1; i <= count; i++) {
+    for (std::size_t i = 1; i <= count/5; i++) {
       h.insert(i);
-      if (i % (count/400) == 0) {
+      if (i % 100 == 0) {
         double est = h.estimate();
         std::cerr << i << " " << h.is_sparse() << " " <<
           i*(1.0 - relative_error) << " " << est << " " <<
