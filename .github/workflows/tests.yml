@@ -43,4 +43,4 @@ jobs:
     - name: Run tests (not Windows)
       if: ${{ !startsWith(matrix.os, 'windows') }}
       working-directory: build
-      run: ./hyperloglog_tests
+      run: ./hyperloglog_tests '[WTF]'

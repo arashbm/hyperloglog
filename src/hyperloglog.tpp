@@ -129,6 +129,7 @@ hll::hyperloglog<T, p, sp>::hyperloglog(bool create_dense, std::uint64_t seed)
 template <typename T, std::uint8_t p, std::uint8_t sp>
 double
 hll::hyperloglog<T, p, sp>::estimate_bias(double est) const {
+  std::cerr << "given est: " << est << std::endl;
   constexpr std::ptrdiff_t k = 6;  // K-nn parameter
   std::vector<std::pair<double, double>> keys(k);
   auto est_it = std::lower_bound(bias.begin(), bias.end(),
@@ -452,8 +453,10 @@ hll::hyperloglog<T, precision, sparse_precision>::estimate() const {
     std::size_t non_zeros;
     std::tie(e, non_zeros) = raw_estimate();
 
+    std::cerr << "before: " << e << std::endl;
     if (e <= 5*(1ul << precision))
       e = e - estimate_bias(e);
+    std::cerr << "after: " << e << std::endl;
 
     double h;
     if (non_zeros < (1ul << precision))

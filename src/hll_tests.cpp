@@ -161,8 +161,6 @@ double estimate_bias(double est) {
   for (auto& k: keys)
     std::cerr << k.first - est << ", ";
   std::cerr << std::endl;
-
-  std::cerr << "sum: " << sum << std::endl;
   std::cerr << "weight_sum: " << weight_sum << std::endl;
 
   return sum/weight_sum;
@@ -175,7 +173,7 @@ TEST_CASE("The weird case of 350285", "[WTF]") {
 
   std::cerr << "estimate: " << h.estimate() << std::endl;
 
-  double bias = estimate_bias(409892.0);
+  double bias = estimate_bias(350056.0);
   std::cerr << "bias: " << bias << std::endl;
 }
 
