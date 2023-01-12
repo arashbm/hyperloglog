@@ -38,16 +38,13 @@ Include(FetchContent)
 FetchContent_Declare(
   Catch2
   GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-  GIT_TAG v2.13.10)
+  GIT_TAG v3.2.1)
 
 FetchContent_MakeAvailable(Catch2)
 
-add_executable(
-  ${PROJECT_NAME}_tests
-  EXCLUDE_FROM_ALL
-  src/tests.cpp src/hll_tests.cpp)
-target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${PROJECT_NAME})
-target_link_libraries(${PROJECT_NAME}_tests PRIVATE Catch2::Catch2)
+add_executable(${PROJECT_NAME}_tests EXCLUDE_FROM_ALL src/tests.cpp)
+target_link_libraries(${PROJECT_NAME}_tests PRIVATE
+  ${PROJECT_NAME} Catch2::Catch2WithMain)
 if(NOT MSVC)
   target_compile_options(${PROJECT_NAME}_tests PRIVATE
     -Werror -Wall -Wextra -Wconversion -Wsign-conversion
@@ -57,8 +54,6 @@ if(NOT MSVC)
 endif()
 
 include(CTest)
-
-list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/contrib)
 include(Catch)
 catch_discover_tests(${PROJECT_NAME}_tests)
 
