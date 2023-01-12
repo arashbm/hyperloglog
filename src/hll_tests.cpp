@@ -137,51 +137,33 @@ std::pair<std::uint64_t, std::uint8_t> get_hash_rank(std::uint64_t hash) {
   return std::make_pair(index, rank);
 }
 
+std::pair<double, std::size_t> raw_estimate(
+      const std::vector<std::uint8_t>& dense) {
+  double sum = 0;
+  std::size_t non_zeros = 0;
+  for (auto&& m_j: dense) {
+    if (m_j > 0) non_zeros += 1;
+    sum += 1.0/static_cast<double>(1ul << m_j);
+  }
+
+  double alpha = 0.7213/(1.0+1.079/(1ul << p));
+
+  return std::make_pair(
+      alpha*std::pow((1ul << p), 2)/sum,
+      non_zeros);
+}
+
 TEST_CASE("The weird case of 350285", "[WTF]") {
   hll::hyperloglog<std::size_t, p, sp> h;
-  for (std::size_t i = 1; i < 350284; i++)
+  for (std::size_t i = 1; i <= 350285; i++)
     h.insert(i);
 
   std::cerr << "estimate: " << h.estimate() << std::endl;
-  std::uint64_t seed = 0x9E3779B97F4A7C15ul;
 
-  std::size_t item = 350284;
-  std::cerr << "item: " << item << std::endl;
-  std::uint64_t hash = hll::hash<std::size_t>{}(item, seed);
-  std::cerr << "hash: " << hash << std::endl;
-
-  std::uint64_t index;
-  std::uint8_t rank;
-  std::tie(index, rank) = get_hash_rank(hash);
-  std::cerr << "index: " << index <<
-    " rank: " << (std::uint64_t)rank << std::endl;
-  std::cerr << "current_rank: " <<
-    (std::uint64_t)h.dense_vec()[index] << std::endl;
-  h.insert(item);
-  std::cerr << "current_rank: " <<
-    (std::uint64_t)h.dense_vec()[index] << std::endl;
-  std::cerr << "estimate: " << h.estimate() << std::endl;
-
-  item = 350285;
-  std::cerr << "item: " << item << std::endl;
-  hash = hll::hash<std::size_t>{}(item, seed);
-  std::cerr << "hash: " << hash << std::endl;
-  std::tie(index, rank) = get_hash_rank(hash);
-  std::cerr << "index: " << index <<
-    " rank: " << (std::uint64_t)rank << std::endl;
-  std::cerr << "current_rank: " <<
-    (std::uint64_t)h.dense_vec()[index] << std::endl;
-  h.insert(item);
-  std::cerr << "current_rank: " <<
-    (std::uint64_t)h.dense_vec()[index] << std::endl;
-  std::cerr << "estimate: " << h.estimate() << std::endl;
-
-  for (std::size_t i = 0; i < h.dense_vec().size(); i++) {
-    if (i % 128 == 0)
-      std::cerr << std::endl;
-    std::cerr << std::hex << (std::uint64_t)h.dense_vec()[i] << std::dec;
-  }
-  std::cerr << std::endl;
+  double e;
+  std::size_t non_zeros;
+  std::tie(e, non_zeros) = raw_estimate(h.dense_vec());
+  std::cerr << "e: " << e << " nonzeros: " << non_zeros << std::endl;
 }
 
 TEST_CASE("counts after transitioning from sparse to dense", "[transition]") {
