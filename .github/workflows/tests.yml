@@ -35,12 +35,6 @@ jobs:
         cmake -Bbuild -S.
         cmake --build build/ --target hyperloglog_tests
 
-    - name: Run tests (Windows)
-      if: ${{ startsWith(matrix.os, 'windows') }}
-      working-directory: build\Debug
-      run: ctest -C Debug
-
-    - name: Run tests (not Windows)
-      if: ${{ !startsWith(matrix.os, 'windows') }}
+    - name: Run tests
       working-directory: build
-      run: ctest
+      run: ctest -C Debug
