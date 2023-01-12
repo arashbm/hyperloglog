@@ -37,4 +37,4 @@ jobs:
 
     - name: Run tests
       working-directory: build
-      run: ctest -C Debug
+      run: ctest -C Debug --output-on-failure
