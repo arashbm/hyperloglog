@@ -42,7 +42,6 @@ namespace hll {
     const std::vector<std::uint8_t>& dense_vec() const;
 
   private:
-    static const std::vector<std::pair<double, double>> bias;
     constexpr static std::size_t sparse_list_max
       = (1ul << precision)/sizeof(std::uint64_t);
     constexpr static std::size_t temporary_list_max

@@ -129,28 +129,20 @@ hll::hyperloglog<T, p, sp>::hyperloglog(bool create_dense, std::uint64_t seed)
 template <typename T, std::uint8_t p, std::uint8_t sp>
 double
 hll::hyperloglog<T, p, sp>::estimate_bias(double est) const {
-  std::cerr << "given est: " << est << std::endl;
-  std::cerr << "biases:" << bias.size() << std::endl;
   constexpr std::ptrdiff_t k = 6;  // K-nn parameter
   std::vector<std::pair<double, double>> keys(k);
-  auto est_it = std::lower_bound(bias.begin(), bias.end(),
+  auto est_it = std::lower_bound(biases[p-4].begin(), biases[p-4].end(),
       std::make_pair(est, 0.0));
-  std::ptrdiff_t est_idx = est_it - bias.begin();
-  std::cerr << "est_idx:" << est_idx << std::endl;
-  std::ptrdiff_t ssize = static_cast<std::ptrdiff_t>(bias.size());
+  std::ptrdiff_t est_idx = est_it - biases[p-4].begin();
+  std::ptrdiff_t ssize = static_cast<std::ptrdiff_t>(biases[p-4].size());
   std::partial_sort_copy(
-      est_idx <= k ? bias.begin() : est_it - k,
-      est_idx + k >= ssize ? bias.end() : est_it + k,
+      est_idx <= k ? biases[p-4].begin() : est_it - k,
+      est_idx + k >= ssize ? biases[p-4].end() : est_it + k,
       keys.begin(), keys.end(),
       [est] (const std::pair<double, double>& a,
               const std::pair<double, double>& b) {
               return std::abs(a.first - est) < std::abs(b.first - est);
       });
-
-  std::cerr << "keys:" << std::endl;
-  for (auto& k: keys)
-    std::cerr << "{" << k.first << ", " << k.second << "}, ";
-  std::cerr << std::endl;
 
   double sum = 0;
   double weight_sum = 0;
@@ -164,21 +156,8 @@ hll::hyperloglog<T, p, sp>::estimate_bias(double est) const {
         t.second + 1.0/std::abs(key.first-est));
       });
 
-  std::cerr << "distances:" << std::endl;
-  for (auto& k: keys)
-    std::cerr << k.first - est << ", ";
-  std::cerr << std::endl;
-  std::cerr << "sum: " << sum << std::endl;
-  std::cerr << "weight_sum: " << weight_sum << std::endl;
-
   return sum/weight_sum;
 }
-
-
-template <typename T, std::uint8_t p, std::uint8_t sp>
-const std::vector<std::pair<double, double>>
-hll::hyperloglog<T, p, sp>::bias = hll::biases[p-4];
-
 
 template <typename T, std::uint8_t p, std::uint8_t sp>
 constexpr double
@@ -468,10 +447,8 @@ hll::hyperloglog<T, precision, sparse_precision>::estimate() const {
     std::size_t non_zeros;
     std::tie(e, non_zeros) = raw_estimate();
 
-    std::cerr << "before: " << e << std::endl;
     if (e <= 5*(1ul << precision))
       e = e - estimate_bias(e);
-    std::cerr << "after: " << e << std::endl;
 
     double h;
     if (non_zeros < (1ul << precision))

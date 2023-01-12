@@ -123,15 +123,6 @@ TEST_CASE("counts large sets", "[dense]") {
   }
 }
 
-TEST_CASE("The weird case of 350285", "[WTF]") {
-  hll::hyperloglog<std::size_t, p, sp> h;
-  for (std::size_t i = 1; i <= 350285; i++)
-    h.insert(i);
-
-  double est = h.estimate();
-  std::cerr << "estimate: " << est << std::endl;
-}
-
 TEST_CASE("counts after transitioning from sparse to dense", "[transition]") {
   hll::hyperloglog<std::size_t, p, sp> h;
   std::size_t m = (1ul << p);
@@ -153,11 +144,8 @@ TEST_CASE("counts after transitioning from sparse to dense", "[transition]") {
   SECTION("large cardinalities") {
     for (std::size_t i = 1; i <= count/5; i++) {
       h.insert(i);
-      if (i > 350280 && i < 350290) {
+      if (i % 2000 == 0) {
         double est = h.estimate();
-        std::cerr << i << " " << h.is_sparse() << " " <<
-          i*(1.0 - relative_error) << " " << est << " " <<
-          i*(1.0 + relative_error) <<  std::endl;
         REQUIRE(est < i*(1.0 + relative_error));
         REQUIRE(i*(1.0 - relative_error) < est);
       }
