@@ -123,58 +123,13 @@ TEST_CASE("counts large sets", "[dense]") {
   }
 }
 
-double estimate_bias(double est) {
-  auto bias = hll::biases[p-4];
-  constexpr std::ptrdiff_t k = 6;  // K-nn parameter
-  std::vector<std::pair<double, double>> keys(k);
-  auto est_it = std::lower_bound(bias.begin(), bias.end(),
-      std::make_pair(est, 0.0));
-  std::ptrdiff_t est_idx = est_it - bias.begin();
-  std::ptrdiff_t ssize = static_cast<std::ptrdiff_t>(bias.size());
-  std::partial_sort_copy(
-      est_idx <= k ? bias.begin() : est_it - k,
-      est_idx + k >= ssize ? bias.end() : est_it + k,
-      keys.begin(), keys.end(),
-      [est] (const std::pair<double, double>& a,
-              const std::pair<double, double>& b) {
-              return std::abs(a.first - est) < std::abs(b.first - est);
-      });
-
-  std::cerr << "keys:" << std::endl;
-  for (auto& k: keys)
-    std::cerr << "{" << k.first << ", " << k.second << "}, ";
-  std::cerr << std::endl;
-
-  double sum = 0;
-  double weight_sum = 0;
-  std::tie(sum, weight_sum) = std::accumulate(keys.begin(), keys.begin()+k,
-      std::make_pair(0.0, 0.0),
-      [est] (
-        std::pair<double, double> t,  // (sum, sum of weights)
-        std::pair<double, double> key) {  // (distance, bias)
-      return std::make_pair(
-        t.first + key.second*1.0/std::abs(key.first-est),
-        t.second + 1.0/std::abs(key.first-est));
-      });
-
-  std::cerr << "distances:" << std::endl;
-  for (auto& k: keys)
-    std::cerr << k.first - est << ", ";
-  std::cerr << std::endl;
-  std::cerr << "weight_sum: " << weight_sum << std::endl;
-
-  return sum/weight_sum;
-}
-
 TEST_CASE("The weird case of 350285", "[WTF]") {
   hll::hyperloglog<std::size_t, p, sp> h;
   for (std::size_t i = 1; i <= 350285; i++)
     h.insert(i);
 
-  std::cerr << "estimate: " << h.estimate() << std::endl;
-
-  double bias = estimate_bias(350056.0);
-  std::cerr << "bias: " << bias << std::endl;
+  double est = h.estimate();
+  std::cerr << "estimate: " << est << std::endl;
 }
 
 TEST_CASE("counts after transitioning from sparse to dense", "[transition]") {

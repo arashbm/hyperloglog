@@ -145,6 +145,11 @@ hll::hyperloglog<T, p, sp>::estimate_bias(double est) const {
               return std::abs(a.first - est) < std::abs(b.first - est);
       });
 
+  std::cerr << "keys:" << std::endl;
+  for (auto& k: keys)
+    std::cerr << "{" << k.first << ", " << k.second << "}, ";
+  std::cerr << std::endl;
+
   double sum = 0;
   double weight_sum = 0;
   std::tie(sum, weight_sum) = std::accumulate(keys.begin(), keys.begin()+k,
@@ -156,6 +161,14 @@ hll::hyperloglog<T, p, sp>::estimate_bias(double est) const {
         t.first + key.second*1.0/std::abs(key.first-est),
         t.second + 1.0/std::abs(key.first-est));
       });
+
+  std::cerr << "distances:" << std::endl;
+  for (auto& k: keys)
+    std::cerr << k.first - est << ", ";
+  std::cerr << std::endl;
+  std::cerr << "sum: " << sum << std::endl;
+  std::cerr << "weight_sum: " << weight_sum << std::endl;
+
   return sum/weight_sum;
 }
 
