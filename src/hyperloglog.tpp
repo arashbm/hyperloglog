@@ -152,8 +152,8 @@ hll::hyperloglog<T, p, sp>::estimate_bias(double est) const {
         std::pair<double, double> t,  // (sum, sum of weights)
         std::pair<double, double> key) {  // (distance, bias)
       return std::make_pair(
-        t.first + key.second*1.0/std::abs(key.first-est),
-        t.second + 1.0/std::abs(key.first-est));
+        t.first + key.second*1.0/(std::abs(key.first-est) + 1e-5),
+        t.second + 1.0/(std::abs(key.first-est) + 1e-5));
       });
 
   return sum/weight_sum;
