@@ -59,6 +59,12 @@ else()
     -fsanitize=address,undefined)
 endif()
 
+include(CTest)
+
+list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/contrib)
+include(Catch)
+catch_discover_tests(${PROJECT_NAME}_tests)
+
 install(
   TARGETS ${PROJECT_NAME}
   EXPORT ${PROJECT_NAME}_Targets
