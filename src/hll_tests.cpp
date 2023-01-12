@@ -123,39 +123,49 @@ TEST_CASE("counts large sets", "[dense]") {
   }
 }
 
+double estimate_bias(double est) {
+  auto bias = hll::biases[p-4];
+  constexpr std::ptrdiff_t k = 6;  // K-nn parameter
+  std::vector<std::pair<double, double>> keys(k);
+  auto est_it = std::lower_bound(bias.begin(), bias.end(),
+      std::make_pair(est, 0.0));
+  std::ptrdiff_t est_idx = est_it - bias.begin();
+  std::ptrdiff_t ssize = static_cast<std::ptrdiff_t>(bias.size());
+  std::partial_sort_copy(
+      est_idx <= k ? bias.begin() : est_it - k,
+      est_idx + k >= ssize ? bias.end() : est_it + k,
+      keys.begin(), keys.end(),
+      [est] (const std::pair<double, double>& a,
+              const std::pair<double, double>& b) {
+              return std::abs(a.first - est) < std::abs(b.first - est);
+      });
 
-std::pair<std::uint64_t, std::uint8_t> get_hash_rank(std::uint64_t hash) {
-  std::uint8_t precision;
-  precision = p;
+  std::cerr << "keys:" << std::endl;
+  for (auto& k: keys)
+    std::cerr << "{" << k.first << ", " << k.second << "}, ";
+  std::cerr << std::endl;
 
-  std::uint64_t index = (std::uint64_t)(hash >> (sizeof(hash)*8 - precision));
-
-  std::uint8_t rank = static_cast<std::uint8_t>(sizeof(hash)*8 - precision);
-  std::uint64_t h = hash << precision;
-  if (h > 0)
-    rank = std::min(rank, static_cast<std::uint8_t>(hll_countl_zero(h) + 1));
-  return std::make_pair(index, rank);
-}
-
-std::pair<double, std::size_t> raw_estimate(
-      const std::vector<std::uint8_t>& dense) {
   double sum = 0;
-  std::size_t non_zeros = 0;
-  for (auto&& m_j: dense) {
-    if (m_j > 0) non_zeros += 1;
-    sum += 1.0/static_cast<double>(1ul << m_j);
-  }
+  double weight_sum = 0;
+  std::tie(sum, weight_sum) = std::accumulate(keys.begin(), keys.begin()+k,
+      std::make_pair(0.0, 0.0),
+      [est] (
+        std::pair<double, double> t,  // (sum, sum of weights)
+        std::pair<double, double> key) {  // (distance, bias)
+      return std::make_pair(
+        t.first + key.second*1.0/std::abs(key.first-est),
+        t.second + 1.0/std::abs(key.first-est));
+      });
 
-  double alpha = 0.7213/(1.0+1.079/(1ul << p));
+  std::cerr << "distances:" << std::endl;
+  for (auto& k: keys)
+    std::cerr << k.first - est << ", ";
+  std::cerr << std::endl;
 
-  return std::make_pair(
-      alpha*std::pow((1ul << p), 2)/sum,
-      non_zeros);
-}
+  std::cerr << "sum: " << sum << std::endl;
+  std::cerr << "weight_sum: " << weight_sum << std::endl;
 
-double linear_estimate(std::size_t non_zero) {
-  double m = static_cast<double>(1ul << p);
-  return m*std::log(m/(m-static_cast<double>(non_zero)));
+  return sum/weight_sum;
 }
 
 TEST_CASE("The weird case of 350285", "[WTF]") {
@@ -165,12 +175,8 @@ TEST_CASE("The weird case of 350285", "[WTF]") {
 
   std::cerr << "estimate: " << h.estimate() << std::endl;
 
-  double e;
-  std::size_t non_zeros;
-  std::tie(e, non_zeros) = raw_estimate(h.dense_vec());
-  std::cerr << "e: " << e << " nonzeros: " << non_zeros << std::endl;
-  double lin_h = linear_estimate(non_zeros);
-  std::cerr << "linear: " << lin_h << std::endl;
+  double bias = estimate_bias(409892.0);
+  std::cerr << "bias: " << bias << std::endl;
 }
 
 TEST_CASE("counts after transitioning from sparse to dense", "[transition]") {
