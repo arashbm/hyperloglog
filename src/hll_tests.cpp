@@ -153,6 +153,11 @@ std::pair<double, std::size_t> raw_estimate(
       non_zeros);
 }
 
+double linear_estimate(std::size_t non_zero) {
+  double m = static_cast<double>(1ul << p);
+  return m*std::log(m/(m-static_cast<double>(non_zero)));
+}
+
 TEST_CASE("The weird case of 350285", "[WTF]") {
   hll::hyperloglog<std::size_t, p, sp> h;
   for (std::size_t i = 1; i <= 350285; i++)
@@ -164,6 +169,8 @@ TEST_CASE("The weird case of 350285", "[WTF]") {
   std::size_t non_zeros;
   std::tie(e, non_zeros) = raw_estimate(h.dense_vec());
   std::cerr << "e: " << e << " nonzeros: " << non_zeros << std::endl;
+  double lin_h = linear_estimate(non_zeros);
+  std::cerr << "linear: " << lin_h << std::endl;
 }
 
 TEST_CASE("counts after transitioning from sparse to dense", "[transition]") {
