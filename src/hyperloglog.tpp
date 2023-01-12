@@ -130,11 +130,13 @@ template <typename T, std::uint8_t p, std::uint8_t sp>
 double
 hll::hyperloglog<T, p, sp>::estimate_bias(double est) const {
   std::cerr << "given est: " << est << std::endl;
+  std::cerr << "biases:" << bias.size() << std::endl;
   constexpr std::ptrdiff_t k = 6;  // K-nn parameter
   std::vector<std::pair<double, double>> keys(k);
   auto est_it = std::lower_bound(bias.begin(), bias.end(),
       std::make_pair(est, 0.0));
   std::ptrdiff_t est_idx = est_it - bias.begin();
+  std::cerr << "est_idx:" << est_idx << std::endl;
   std::ptrdiff_t ssize = static_cast<std::ptrdiff_t>(bias.size());
   std::partial_sort_copy(
       est_idx <= k ? bias.begin() : est_it - k,
