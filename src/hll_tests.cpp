@@ -175,6 +175,13 @@ TEST_CASE("The weird case of 350285", "[WTF]") {
   std::cerr << "current_rank: " <<
     (std::uint64_t)h.dense_vec()[index] << std::endl;
   std::cerr << "estimate: " << h.estimate() << std::endl;
+
+  for (std::size_t i = 0; i < h.dense_vec().size(); i++) {
+    if (i % 128 == 0)
+      std::cerr << std::endl;
+    std::cerr << std::hex << (std::uint64_t)h.dense_vec()[i] << std::dec;
+  }
+  std::cerr << std::endl;
 }
 
 TEST_CASE("counts after transitioning from sparse to dense", "[transition]") {
