@@ -38,7 +38,7 @@ jobs:
     - name: Run tests (Windows)
       if: ${{ startsWith(matrix.os, 'windows') }}
       working-directory: build\Debug
-      run: ctest
+      run: ctest -C Debug
 
     - name: Run tests (not Windows)
       if: ${{ !startsWith(matrix.os, 'windows') }}
