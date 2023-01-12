@@ -48,10 +48,7 @@ add_executable(
   src/tests.cpp src/hll_tests.cpp)
 target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME}_tests PRIVATE Catch2::Catch2)
-if(MSVC)
-  target_compile_options(${PROJECT_NAME}_tests PRIVATE
-    /W4 /fsanitize=address)
-else()
+if(NOT MSVC)
   target_compile_options(${PROJECT_NAME}_tests PRIVATE
     -Werror -Wall -Wextra -Wconversion -Wsign-conversion
     -fsanitize=address,undefined -g)
