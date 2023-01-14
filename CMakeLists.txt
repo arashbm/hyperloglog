@@ -5,6 +5,13 @@ project(hyperloglog LANGUAGES CXX VERSION 0.2)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+get_directory_property(is_subproject PARENT_DIRECTORY)
+if(NOT is_subproject)
+  set(is_standalone YES)
+else()
+  set(is_standalone NO)
+endif()
+
 include(GNUInstallDirs)
 
 add_library(${PROJECT_NAME} src/murmurhash.cpp)
@@ -53,9 +60,11 @@ if(NOT MSVC)
     -fsanitize=address,undefined)
 endif()
 
-include(CTest)
-include(Catch)
-catch_discover_tests(${PROJECT_NAME}_tests)
+if (is_standalone)
+  include(CTest)
+  include(Catch)
+  catch_discover_tests(${PROJECT_NAME}_tests)
+endif()
 
 install(
   TARGETS ${PROJECT_NAME}
