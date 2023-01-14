@@ -48,6 +48,7 @@ FetchContent_Declare(
   GIT_TAG v3.2.1)
 
 FetchContent_MakeAvailable(Catch2)
+list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 
 add_executable(${PROJECT_NAME}_tests EXCLUDE_FROM_ALL src/tests.cpp)
 target_link_libraries(${PROJECT_NAME}_tests PRIVATE
