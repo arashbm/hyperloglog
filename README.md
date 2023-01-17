@@ -27,7 +27,7 @@ has a relative error of 1.6% for large multisets.
 ## Installation
 This package relies on cmake. Make sure a moderatly recent version (3.14 or
 newer) is already installed. You should also have a C++ compiler with C++14
-support. We regularly test this with GCC 8.4 so anything more recent should do.
+support.
 
 
 Here is how to build and run the tests:
@@ -71,7 +71,7 @@ Assuming you have installed the library as instructed above, you can compile
 and run `example.cpp` with:
 
 ```bash
-$ g++ -std=c++14 -o example example.cpp
+$ g++ -std=c++14 -lhyperloglog -o example example.cpp
 $ time ./example
 Estimate is 1.00296e+07
 
@@ -84,4 +84,4 @@ On a relativly recent comodity CPU `hll::hyperloglog` enables you to insert and
 calculate cardinality of ten million items in less than a second.
 
 See more examples of `hll::hyperloglog` in the tests located at
-`src/hll_tests.cpp`.
+`src/tests.cpp`.
