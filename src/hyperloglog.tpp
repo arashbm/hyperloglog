@@ -213,8 +213,7 @@ hll::hyperloglog<T, p, sp>::get_hash_rank(std::uint64_t hash) const {
   else
     precision = p;
 
-  std::uint64_t index = static_cast<std::uint64_t>(
-      hash >> (sizeof(hash)*8 - precision));
+  std::uint64_t index = hash >> (sizeof(hash)*8 - precision);
 
   std::uint8_t rank = static_cast<std::uint8_t>(sizeof(hash)*8 - precision);
   std::uint64_t h = hash << precision;
@@ -443,7 +442,7 @@ double
 hll::hyperloglog<T, precision, sparse_precision>::estimate() const {
   if (sparse) {
     size_t nonzero = merged_temp_list().size();
-    return linear_estimate(static_cast<std::size_t>(nonzero));
+    return linear_estimate(nonzero);
   } else {
     double e;
     std::size_t non_zeros;
