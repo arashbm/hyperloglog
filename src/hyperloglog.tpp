@@ -213,7 +213,8 @@ hll::hyperloglog<T, p, sp>::get_hash_rank(std::uint64_t hash) const {
   else
     precision = p;
 
-  std::uint64_t index = (std::uint64_t)(hash >> (sizeof(hash)*8 - precision));
+  std::uint64_t index = static_cast<std::uint64_t>(
+      hash >> (sizeof(hash)*8 - precision));
 
   std::uint8_t rank = static_cast<std::uint8_t>(sizeof(hash)*8 - precision);
   std::uint64_t h = hash << precision;
@@ -233,7 +234,7 @@ template <typename T, std::uint8_t p, std::uint8_t sp>
 std::pair<std::uint64_t, std::uint8_t>
 hll::hyperloglog<T, p, sp>::decode_hash(std::uint64_t hash) const {
   std::uint64_t index = (hash >> rank_bits);
-  std::uint8_t rank = (std::uint8_t)(((1 << rank_bits)-1) & hash);
+  std::uint8_t rank = static_cast<std::uint8_t>(((1 << rank_bits)-1) & hash);
   return std::make_pair(index, rank);
 }
 
@@ -376,7 +377,7 @@ template <typename T, std::uint8_t precision, std::uint8_t sparse_precision>
 std::vector<std::uint8_t>
 hll::hyperloglog<T, precision, sparse_precision>::converted_to_dense()
   const {
-  std::vector<std::uint8_t> new_dense(1ul << precision, (std::uint8_t)0);
+  std::vector<std::uint8_t> new_dense(1ul << precision, std::uint8_t{});
 
   std::vector<std::uint64_t> slist = merged_temp_list();
   for (const auto i: slist) {
@@ -391,11 +392,12 @@ hll::hyperloglog<T, precision, sparse_precision>::converted_to_dense()
     std::uint8_t dense_rank;
 
     if (betweens == 0)
-      dense_rank = (std::uint8_t)(rank + (sparse_precision - precision));
+      dense_rank = static_cast<std::uint8_t>(
+          rank + (sparse_precision - precision));
     else
-      dense_rank = (std::uint8_t)
-        (((std::uint8_t)hll_countl_zero(betweens) -
-          (sizeof(betweens)*8 - (sparse_precision - precision))) + 1);
+      dense_rank = static_cast<std::uint8_t>(
+          (static_cast<std::uint8_t>(hll_countl_zero(betweens)) -
+           (sizeof(betweens)*8 - (sparse_precision - precision))) + 1);
     if (dense_rank > new_dense[dense_index])
       new_dense[dense_index] = dense_rank;
   }
@@ -441,7 +443,7 @@ double
 hll::hyperloglog<T, precision, sparse_precision>::estimate() const {
   if (sparse) {
     size_t nonzero = merged_temp_list().size();
-    return linear_estimate((std::size_t)nonzero);
+    return linear_estimate(static_cast<std::size_t>(nonzero));
   } else {
     double e;
     std::size_t non_zeros;
