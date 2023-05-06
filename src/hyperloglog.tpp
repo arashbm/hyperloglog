@@ -15,6 +15,7 @@
 
 // switch to std::countl_zero when only supporting c++ > 20
 #ifdef _MSC_VER
+  #include <intrin.h>
   #define hll_countl_zero __lzcnt64
 #else
   #define hll_countl_zero __builtin_clzl
