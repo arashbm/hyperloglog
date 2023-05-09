@@ -313,9 +313,7 @@ hll::hyperloglog<T, precision, sparse_precision>::merged_sorted_list(
   auto it1 = sorted_list.begin();
   auto it2 = sparse_list.begin();
 
-  int i = 0;
   while (it1 != sorted_list.end() && it2 != sparse_list.end()) {
-    i++;
     std::uint64_t index1;
     std::uint8_t rank1;
     std::tie(index1, rank1) = decode_hash(*it1);
