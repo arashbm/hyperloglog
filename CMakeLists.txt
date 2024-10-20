@@ -30,44 +30,43 @@ else()
   -Wno-implicit-fallthrough)
 endif()
 
-
-add_executable(estimate_distribution
-  EXCLUDE_FROM_ALL
-  src/estimate_distribution.cpp)
-target_link_libraries(estimate_distribution PRIVATE ${PROJECT_NAME})
-
-add_executable(record_biases
-  EXCLUDE_FROM_ALL
-  src/record_biases.cpp)
-target_link_libraries(record_biases PRIVATE ${PROJECT_NAME})
-
-Include(FetchContent)
-FetchContent_Declare(
-  Catch2
-  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-  GIT_TAG v3.2.1)
-
-FetchContent_MakeAvailable(Catch2)
-list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
-
-add_executable(${PROJECT_NAME}_tests EXCLUDE_FROM_ALL src/tests.cpp)
-target_link_libraries(${PROJECT_NAME}_tests PRIVATE
-  ${PROJECT_NAME} Catch2::Catch2WithMain)
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  target_compile_options(${PROJECT_NAME}_tests PRIVATE
-    /W4 /permissive- /w14242 /w14254 /w14263 /w14265 /w14287 /we4289 /w14296
-    /w14311 /w14545 /w14546 /w14547 /w14549 /w14555 /w14619 /w14640 /w14826
-    /w14905 /w14906 /w14928)
-else()
-  target_compile_options(${PROJECT_NAME}_tests PRIVATE
-    -Werror -Wall -Wextra -Wconversion -Wsign-conversion -Wnull-dereference
-    -Wnon-virtual-dtor -Wold-style-cast -Wcast-align -Wunused
-    -Woverloaded-virtual -Wpedantic -Wimplicit-fallthrough)
-  target_link_options(${PROJECT_NAME}_tests PRIVATE
-    -fsanitize=address,undefined)
-endif()
-
 if (is_standalone)
+  add_executable(estimate_distribution
+    EXCLUDE_FROM_ALL
+    src/estimate_distribution.cpp)
+  target_link_libraries(estimate_distribution PRIVATE ${PROJECT_NAME})
+
+  add_executable(record_biases
+    EXCLUDE_FROM_ALL
+    src/record_biases.cpp)
+  target_link_libraries(record_biases PRIVATE ${PROJECT_NAME})
+
+  Include(FetchContent)
+  FetchContent_Declare(
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG v3.2.1)
+
+  FetchContent_MakeAvailable(Catch2)
+  list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+
+  add_executable(${PROJECT_NAME}_tests EXCLUDE_FROM_ALL src/tests.cpp)
+  target_link_libraries(${PROJECT_NAME}_tests PRIVATE
+    ${PROJECT_NAME} Catch2::Catch2WithMain)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(${PROJECT_NAME}_tests PRIVATE
+      /W4 /permissive- /w14242 /w14254 /w14263 /w14265 /w14287 /we4289 /w14296
+      /w14311 /w14545 /w14546 /w14547 /w14549 /w14555 /w14619 /w14640 /w14826
+      /w14905 /w14906 /w14928)
+  else()
+    target_compile_options(${PROJECT_NAME}_tests PRIVATE
+      -Werror -Wall -Wextra -Wconversion -Wsign-conversion -Wnull-dereference
+      -Wnon-virtual-dtor -Wold-style-cast -Wcast-align -Wunused
+      -Woverloaded-virtual -Wpedantic -Wimplicit-fallthrough)
+    target_link_options(${PROJECT_NAME}_tests PRIVATE
+      -fsanitize=address,undefined)
+  endif()
+
   include(CTest)
   include(Catch)
   catch_discover_tests(${PROJECT_NAME}_tests)
