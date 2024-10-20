@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-2022, macos-12]
+        os: [ubuntu-24.04, windows-2022, macos-14]
 
     steps:
     - name: Install Pre-requisits on ubuntu
@@ -28,7 +28,7 @@ jobs:
         ninja --version
         cmake --version
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: cmake build
       run: |
         mkdir build
