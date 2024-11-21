@@ -1,11 +1,3 @@
-/**
- *
- * HyperLogLog++ Implementation
- *
- * Arash Badie Modiri <arashbm@gmail.com>
- *
- */
-
 #include <string>
 #include <algorithm>
 #include <functional>
@@ -176,9 +168,10 @@ hll::hyperloglog<T, p, sp>::alpha() const {
 template <typename T, std::uint8_t p, std::uint8_t sp>
 constexpr double
 hll::hyperloglog<T, p, sp>::threshold() const {
-  double thresholds[] = { 10,     20,     40,     80,     220,
-                          400,    900,    1800,   3100,   6500,
-                          11500,  20000,  50000,  120000, 350000};
+  constexpr double thresholds[] = {
+        10,     20,     40,     80,     220,
+        400,    900,    1800,   3100,   6500,
+        11500,  20000,  50000,  120000, 350000};
   return thresholds[p-4];
 }
 
@@ -275,10 +268,10 @@ void hll::hyperloglog<T, p, sp>::merge(
 
 template <typename T, std::uint8_t precision, std::uint8_t sparse_precision>
 void hll::hyperloglog<T, precision, sparse_precision>::insert(T item) {
-  std::uint64_t hash = hll::hash<T>{}(item, seed);
   std::uint64_t index;
   std::uint8_t rank;
-  std::tie(index, rank) = get_hash_rank(hash);
+  std::tie(index, rank) = get_hash_rank(
+        hll::hash<T>{}(item, seed));
 
   if (sparse) {
     std::uint64_t encoded = encode_hash(index, rank);
@@ -307,7 +300,7 @@ hll::hyperloglog<T, precision, sparse_precision>::merge_temp() {
 template <typename T, std::uint8_t precision, std::uint8_t sparse_precision>
 std::vector<std::uint64_t>
 hll::hyperloglog<T, precision, sparse_precision>::merged_sorted_list(
-    const std::vector<std::uint64_t> sorted_list) const {
+    const std::vector<std::uint64_t>& sorted_list) const {
   std::vector<std::uint64_t> new_sparse_list;
 
   auto it1 = sorted_list.begin();

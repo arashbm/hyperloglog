@@ -2,7 +2,6 @@
 #define INCLUDE_HLL_HYPERLOGLOG_HPP_
 
 #include <vector>
-#include <map>
 #include <cstdint>
 
 namespace hll {
@@ -60,7 +59,7 @@ namespace hll {
 
     std::vector<std::uint64_t> merged_temp_list() const;
     std::vector<std::uint64_t> merged_sorted_list(
-        const std::vector<std::uint64_t> other) const;
+        const std::vector<std::uint64_t>& other) const;
 
     double estimate_bias(double biassed_estimate) const;
 
