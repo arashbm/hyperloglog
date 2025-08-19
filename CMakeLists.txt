@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(hyperloglog LANGUAGES CXX VERSION 1.0.0)
+project(
+  hyperloglog
+  LANGUAGES CXX
+  VERSION 1.0.1)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -15,33 +18,29 @@ endif()
 include(GNUInstallDirs)
 
 add_library(${PROJECT_NAME} src/murmurhash.cpp)
-target_include_directories(${PROJECT_NAME} PUBLIC
-  $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}>/include/
-  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-set_target_properties(${PROJECT_NAME} PROPERTIES
-  VERSION ${PROJECT_VERSION}
-  SOVERSION ${PROJECT_VERSION})
+target_include_directories(
+  ${PROJECT_NAME}
+  PUBLIC $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}>/include/
+         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION}
+                                                 SOVERSION ${PROJECT_VERSION})
 if(MSVC)
-  target_compile_options(${PROJECT_NAME} PRIVATE
-    /W4)
+  target_compile_options(${PROJECT_NAME} PRIVATE /W4)
 else()
-  target_compile_options(${PROJECT_NAME} PRIVATE
-  -Werror -Wall -Wextra -Wconversion -Wsign-conversion
-  -Wno-implicit-fallthrough)
+  target_compile_options(
+    ${PROJECT_NAME} PRIVATE -Werror -Wall -Wextra -Wconversion
+                            -Wsign-conversion -Wno-implicit-fallthrough)
 endif()
 
-if (is_standalone)
-  add_executable(estimate_distribution
-    EXCLUDE_FROM_ALL
-    src/estimate_distribution.cpp)
+if(is_standalone)
+  add_executable(estimate_distribution EXCLUDE_FROM_ALL
+                 src/estimate_distribution.cpp)
   target_link_libraries(estimate_distribution PRIVATE ${PROJECT_NAME})
 
-  add_executable(record_biases
-    EXCLUDE_FROM_ALL
-    src/record_biases.cpp)
+  add_executable(record_biases EXCLUDE_FROM_ALL src/record_biases.cpp)
   target_link_libraries(record_biases PRIVATE ${PROJECT_NAME})
 
-  Include(FetchContent)
+  include(FetchContent)
   FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
@@ -53,20 +52,50 @@ if (is_standalone)
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
   add_executable(${PROJECT_NAME}_tests EXCLUDE_FROM_ALL src/tests.cpp)
-  target_link_libraries(${PROJECT_NAME}_tests PRIVATE
-    ${PROJECT_NAME} Catch2::Catch2WithMain)
+  target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${PROJECT_NAME}
+                                                      Catch2::Catch2WithMain)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(${PROJECT_NAME}_tests PRIVATE
-      /W4 /permissive- /w14242 /w14254 /w14263 /w14265 /w14287 /we4289 /w14296
-      /w14311 /w14545 /w14546 /w14547 /w14549 /w14555 /w14619 /w14640 /w14826
-      /w14905 /w14906 /w14928)
+    target_compile_options(
+      ${PROJECT_NAME}_tests
+      PRIVATE /W4
+              /permissive-
+              /w14242
+              /w14254
+              /w14263
+              /w14265
+              /w14287
+              /we4289
+              /w14296
+              /w14311
+              /w14545
+              /w14546
+              /w14547
+              /w14549
+              /w14555
+              /w14619
+              /w14640
+              /w14826
+              /w14905
+              /w14906
+              /w14928)
   else()
-    target_compile_options(${PROJECT_NAME}_tests PRIVATE
-      -Werror -Wall -Wextra -Wconversion -Wsign-conversion -Wnull-dereference
-      -Wnon-virtual-dtor -Wold-style-cast -Wcast-align -Wunused
-      -Woverloaded-virtual -Wpedantic -Wimplicit-fallthrough)
+    target_compile_options(
+      ${PROJECT_NAME}_tests
+      PRIVATE -Werror
+              -Wall
+              -Wextra
+              -Wconversion
+              -Wsign-conversion
+              -Wnull-dereference
+              -Wnon-virtual-dtor
+              -Wold-style-cast
+              -Wcast-align
+              -Wunused
+              -Woverloaded-virtual
+              -Wpedantic
+              -Wimplicit-fallthrough)
     target_link_options(${PROJECT_NAME}_tests PRIVATE
-      -fsanitize=address,undefined)
+                        -fsanitize=address,undefined)
   endif()
 
   include(CTest)
@@ -104,11 +133,9 @@ install(
   NAMESPACE ${PROJECT_NAME}::
   DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake)
 
-install(
-  FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
-  "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
-  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake)
+install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
+              "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
+        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake)
 
-install(
-  DIRECTORY ${PROJECT_SOURCE_DIR}/include/
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
