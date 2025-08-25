@@ -1,18 +1,40 @@
 #include <algorithm>
-#include <vector>
 #include <cmath>
 #include <functional>
 #include <numeric>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
+#include <vector>
 
 // switch to std::countl_zero when only supporting c++ > 20
-#ifdef _MSC_VER
+#if defined(__cpp_lib_bitops) && __cpp_lib_bitops >= 201907L
+#include <bit>
+#define hll_countl_zero std::countl_zero
+#elif defined(_MSC_VER)
 #include <intrin.h>
-#define hll_countl_zero __lzcnt64
+#pragma intrinsic(_BitScanReverse)
+#if defined(_M_X64) || defined(_M_ARM64)
+#pragma intrinsic(_BitScanReverse64)
+#endif
+static inline int hll_countl_zero_u64(std::uint64_t x) noexcept {
+  if (x == 0)
+    return 64;
+  unsigned long idx;
+#if defined(_M_X64) || defined(_M_ARM64)
+  _BitScanReverse64(&idx, x);
+  return 63 - static_cast<int>(idx);
 #else
-#define hll_countl_zero __builtin_clzl
+  // 32-bit fallback
+  if (_BitScanReverse(&idx, static_cast<unsigned long>(x >> 32)))
+    return 31 - static_cast<int>(idx);
+  _BitScanReverse(&idx, static_cast<unsigned long>(x));
+  return 63 - static_cast<int>(idx);
+#endif
+}
+#define hll_countl_zero hll_countl_zero_u64
+#else
+#define hll_countl_zero __builtin_clzll
 #endif
 
 #include "../include/hll/murmurhash.hpp"
