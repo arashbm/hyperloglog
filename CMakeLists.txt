@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 project(
   hyperloglog
   LANGUAGES CXX
-  VERSION 1.1.0)
+  VERSION 1.1.1)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -15,6 +15,8 @@ else()
   set(is_standalone NO)
 endif()
 
+option(HLL_ENABLE_PIC "Build hyperloglog with position independent code" ON)
+
 include(GNUInstallDirs)
 
 add_library(${PROJECT_NAME} src/murmurhash.cpp)
@@ -22,8 +24,10 @@ target_include_directories(
   ${PROJECT_NAME}
   PUBLIC $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}>/include/
          $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION}
-                                                 SOVERSION ${PROJECT_VERSION})
+set_target_properties(
+  ${PROJECT_NAME}
+  PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION}
+  PROPERTIES POSITION_INDEPENDENT_CODE ${HLL_ENABLE_PIC})
 if(MSVC)
   target_compile_options(${PROJECT_NAME} PRIVATE /W4)
 else()
